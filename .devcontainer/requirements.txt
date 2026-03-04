@@ -1,0 +1,12 @@
+fastapi==0.115.0
+uvicorn==0.32.0
+pydantic==2.9.0
+pytest==8.3.2
+httpx==0.27.0
+python-multipart==0.0.22
+openai>=1.0.0
+python-pptx>=0.6.21
+python-dotenv>=1.0.0
+azure-search-documents>=11.4.0
+fabric-cicd>=0.1.34
+ms-fabric-cli>=1.4.0

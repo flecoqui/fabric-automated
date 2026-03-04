@@ -1,0 +1,4 @@
+pyapacheatlas==0.16.0
+openlineage-python==1.37.0
+azure-identity==1.16.1
+azure-storage-blob==12.19.0

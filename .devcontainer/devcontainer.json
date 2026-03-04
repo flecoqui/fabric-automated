@@ -1,0 +1,42 @@
+{
+  "name": "fabric-automated-devcontainer",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    // https://containers.dev/features
+	"git": "latest",
+	"ghcr.io/devcontainers/features/azure-cli:1": {
+		"extensions": "connectedk8s,k8s-extension,containerapp",
+		"installBicep": true
+	},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12"
+    },
+    "ghcr.io/devcontainers/features/terraform:1": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
+    "ghcr.io/rio/features/kustomize:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-vscode.azurecli",
+        "ms-azuretools.vscode-bicep",
+         "ms-azuretools.vscode-azurestaticwebapps",
+         "dbaeumer.vscode-eslint",
+         "bierner.markdown-mermaid"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+        "python.terminal.activateEnvironment": true
+      }
+    }
+  },
+
+  // Install iputils-ping during initial container creation
+  "onCreateCommand": "python -m pip install -r ./.devcontainer/requirements.txt  && sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends iputils-ping",
+  "postCreateCommand": "curl -fsSL  https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc && curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list && sudo apt-get update && sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev && echo 'export PATH=\"$PATH:/opt/mssql-tools18/bin\"' >> ~/.bashrc && sudo apt-get update && sudo apt-get update && sudo apt-get install -y postgresql-client  && echo \"docker $(docker version)\" && echo \"kubectl $(kubectl version)\" && echo \"helm $(helm version)\" && echo \"kustomize $(kustomize version)\" && echo \"python $(python --version)\" && echo \"sqlcmd $(/opt/mssql-tools18/bin/sqlcmd -? | grep Version)\"",
+  "remoteUser": "vscode"
+}

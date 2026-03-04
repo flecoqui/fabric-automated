@@ -1,0 +1,10 @@
+crm_id;name;address;phone;zipcode;sum;order;email
+124;Fred;4 Los Gatos street;+336565656664;22700;7.50;2;fred@example.com
+123;Frank;2 Los Gatos street;+336565656664;22750;67.50;2;frank@example.com
+678;Henry;4 Bay Area street;+336565656665;22500;107.50;3;henry@example.com
+45678;Monique;89 Los Gatos street;+336565656664;22700;7.50;2;monique@example.com
+2e5;William;5 Smith street;+336565656666;22740;1167.50;4;william@example.com
+R5bz;Robert;7 Dublin street;+336565656667;22730;667.50;5;robert@example.com
+Eervts;Bob;8 Dublin street;+336565656668;22740;1667.50;5;bob@example.com
+45679;Mike;89 Mountain View street;+336565656664;22700;7.50;2;mike@example.com
+
