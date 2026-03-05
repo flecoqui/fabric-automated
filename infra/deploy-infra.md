@@ -52,7 +52,7 @@ Once the Git client is installed you can clone the repository on your machine ru
     For instance:
 
     ```bash
-        c:\git> git clone  https://github.com/flecoqui_microsoft/fabric-automated.git
+        c:\git> git clone  https://github.com/flecoqui/fabric-automated.git
         c:\git> cd ./fabric-automated
         c:\git\fabric-automated>
     ```
@@ -146,7 +146,7 @@ Usually this step is not required in a pipeline as the connection with Azure is 
     ```
 
     After this step, the variables AZURE_REGION, AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID and AZURE_ENVIRONMENT used for the deployment are stored in the file ./.config/.default.env.
-    The variable AZURE_DEFAULT_PURVIEW_RESOURCE_GROUP and AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP are by default empty string.
+    The variable AZURE_DEFAULT_FABRIC_RESOURCE_GROUP and AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP are by default empty string.
     By default the name of the Fabric resource group will be 'rgpurview[AZURE_ENVIRONMENT][visibility][AZURE_SUFFIX]'
     the name of the Datasource resource group will be 'rgdatasource[AZURE_ENVIRONMENT][visibility][AZURE_SUFFIX]'
     where [visibility] value is 'pri' for private deployment and 'pub' for public deployment.
@@ -158,19 +158,19 @@ Usually this step is not required in a pipeline as the connection with Azure is 
         AZURE_SUBSCRIPTION_ID=to-be-updated
         AZURE_TENANT_ID=to-be-updated
         AZURE_ENVIRONMENT=dev
-        AZURE_DEFAULT_PURVIEW_RESOURCE_GROUP=""
+        AZURE_DEFAULT_FABRIC_RESOURCE_GROUP=""
         AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP=""
     ```
 
     In order to deploy the infrastructure with the script 'deploy-infra.sh ', you need to be connected to Azure with sufficient privileges to assign roles to Azure Key Vault and Azure Storage Accounts.
     Instead of using an interactive authentication session with Azure using your Azure account, you can use a service principal connection.
 
-    If you don't have enough permission to create the resource groups for this deployment and you must reuse existing resource groups, you can set the values AZURE_DEFAULT_PURVIEW_RESOURCE_GROUP, AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP in file ./.config/.default.env.
+    If you don't have enough permission to create the resource groups for this deployment and you must reuse existing resource groups, you can set the values AZURE_DEFAULT_FABRIC_RESOURCE_GROUP, AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP in file ./.config/.default.env.
 
     For instance:
 
     ```bash
-        AZURE_DEFAULT_PURVIEW_RESOURCE_GROUP="fabric-test-rg"
+        AZURE_DEFAULT_FABRIC_RESOURCE_GROUP="fabric-test-rg"
         AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP="fabric-test-rg"
     ```
 

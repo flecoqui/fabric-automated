@@ -236,26 +236,26 @@ setAzureResourceNames()
 
 
 ##############################################################################
-#- Get Datasource Resource Group Name
+#- Get Fabric Resource Group Name
 #  arg 1: Env
 #  arg 2: Visibility
 #  arg 3: Suffix
 ##############################################################################
-getPurviewResourceGroupName()
+getFabricResourceGroupName()
 {
     env="$1"
     visibility="$2"
     suffix="$3"
-    if [ ! -z "${AZURE_DEFAULT_PURVIEW_RESOURCE_GROUP+x}" ] ; then
-        if [ "${AZURE_DEFAULT_PURVIEW_RESOURCE_GROUP}" != "" ] ; then
-            echo "${AZURE_DEFAULT_PURVIEW_RESOURCE_GROUP}"
+    if [ ! -z "${AZURE_DEFAULT_FABRIC_RESOURCE_GROUP+x}" ] ; then
+        if [ "${AZURE_DEFAULT_FABRIC_RESOURCE_GROUP}" != "" ] ; then
+            echo "${AZURE_DEFAULT_FABRIC_RESOURCE_GROUP}"
             return
         fi
     fi
     if [ -z "${1+x}" ] ; then
-        echo "rgpurviewdevpub"
+        echo "rgfabricdevpub"
     else
-        echo "rgpurview${env}${visibility}${suffix}"
+        echo "rgfabric${env}${visibility}${suffix}"
     fi
 }
 ##############################################################################
@@ -414,14 +414,14 @@ getAvailableSuffix() {
     while [ "$FOUND" = "true" ]; do
         SUFFIX=$(shuf -i 1000-9999 -n 1)
 
-        RG=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "pub" "$SUFFIX")
+        RG=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "pub" "$SUFFIX")
         if [ "$(isResourceGroupNameAvailable "$RG")" = "false" ]; then
             FOUND="true"
             continue
         else
             FOUND="false"
         fi
-        RG=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "pri" "$SUFFIX")
+        RG=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "pri" "$SUFFIX")
         if [ "$(isResourceGroupNameAvailable "$RG")" = "false" ]; then
             FOUND="true"
             continue
@@ -541,7 +541,7 @@ AZURE_SUFFIX="${AZURE_SUFFIX}"
 AZURE_SUBSCRIPTION_ID=${CURRENT_SUBSCRIPTION_ID}
 AZURE_TENANT_ID=${CURRENT_TENANT_ID}
 AZURE_ENVIRONMENT=${AZURE_ENVIRONMENT}
-AZURE_DEFAULT_PURVIEW_RESOURCE_GROUP=""
+AZURE_DEFAULT_FABRIC_RESOURCE_GROUP=""
 AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP=""
 EOF
         fi
@@ -560,6 +560,20 @@ getCurrentObjectId() {
       ObjectId="${ServicePrincipalId}"
   else
       ObjectId="${UserObjectId}"
+  fi
+  echo "$ObjectId"
+}
+##############################################################################
+#- getCurrentUserPrincipalName
+##############################################################################
+getCurrentUserPrincipalName() {
+  UserPrincipalName=$(az ad signed-in-user show --query userPrincipalName --output tsv 2>/dev/null) || true
+  if [ -z "$UserPrincipalName" ]; then
+      # shellcheck disable=SC2154
+      ServicePrincipalId=$(az ad sp show --id "$(az account show | jq -r .user.name)" --query id --output tsv  2> /dev/null)
+      ObjectId="${ServicePrincipalId}"
+  else
+      ObjectId="${UserPrincipalName}"
   fi
   echo "$ObjectId"
 }
@@ -742,7 +756,7 @@ createPurviewVNETIRPrivateEndpoints() {
     exit 1
   fi
 
-  RESOURCE_GROUP_NAME=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "pri" "${AZURE_SUFFIX}")
+  RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "pri" "${AZURE_SUFFIX}")
   PLATFORM_ID=$(az fabric account show -g ${RESOURCE_GROUP_NAME} -n ${PURVIEW_ACCOUNT_NAME} --query id -o tsv 2> /dev/null)
   STORAGE_ID=$(az fabric account show -g ${RESOURCE_GROUP_NAME} -n ${PURVIEW_ACCOUNT_NAME} --query managedResources.storageAccount  -o tsv 2> /dev/null)
   PLATFORM_ENDPOINT_NAME="${PURVIEW_ACCOUNT_NAME}-platform-ep"
@@ -1334,19 +1348,11 @@ readSecretInKeyVault(){
     #checkError
 }
 ##############################################################################
-#- installPreRequisites: Fabric extension, Fabric provider, EventHub provider
+#- installPreRequisites: Fabric provider, EventHub provider
 ##############################################################################
 installPreRequisites(){
     cmd="az config set extension.dynamic_install_allow_preview=true"
     eval "$cmd" >/dev/null 2>/dev/null || true
-    cmd="az extension list --query \"[?name=='fabric'].name\" -o tsv"
-    NAME=$(eval "$cmd" 2>/dev/null) || true
-    if [ -z "$NAME" ] || [ "$NAME" != "fabric" ]; then
-        printProgress "Installing Fabric extension..."
-        cmd="az extension add --name fabric"
-        eval "$cmd"
-        checkError
-    fi
     cmd="az provider list --query \"[?namespace=='Microsoft.Fabric'].namespace\" -o tsv"
     NAME=$(eval "$cmd" 2>/dev/null) || true
     if [ -z "$NAME" ] || [ "$NAME" != "Microsoft.Fabric" ]; then
@@ -1363,14 +1369,7 @@ installPreRequisites(){
         eval "$cmd" 1>/dev/null
         checkError
     fi
-    cmd="az extension list --query \"[?name=='fabric'].name\" -o tsv"
-    NAME=$(eval "$cmd" 2>/dev/null) || true
-    if [ -z "$NAME" ] || [ "$NAME" != "fabric" ]; then
-        printProgress "Adding Fabric Extension"
-        cmd="az extension add --name fabric"
-        eval "$cmd" 1>/dev/null
-        checkError
-    fi    
+  
 }
 ##############################################################################
 #- installSqlcmd
@@ -1660,7 +1659,7 @@ AZURE_SUFFIX=${AZURE_SUFFIX}
 AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID}
 AZURE_TENANT_ID=${AZURE_TENANT_ID}
 AZURE_ENVIRONMENT=${AZURE_ENVIRONMENT}
-AZURE_DEFAULT_PURVIEW_RESOURCE_GROUP=""
+AZURE_DEFAULT_FABRIC_RESOURCE_GROUP=""
 AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP=""
 EOF
     fi
@@ -1674,7 +1673,7 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
     printProgress "Checking whether the Azure CLI providers and extensions are installed..."
     installPreRequisites
     VISIBILITY="pub"
-    RESOURCE_GROUP_NAME=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
+    RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
     if [ "$(az group exists --name "${RESOURCE_GROUP_NAME}")" = "false" ]; then
         printProgress "Create resource group  '${RESOURCE_GROUP_NAME}' in location '${AZURE_REGION}'"
         cmd="az group create -l ${AZURE_REGION} -n ${RESOURCE_GROUP_NAME}"
@@ -1686,9 +1685,8 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
     fi
     setAzureResourceNames ${AZURE_ENVIRONMENT} "${VISIBILITY}" "${AZURE_SUFFIX}" "${RESOURCE_GROUP_NAME}"
 
-    CLIENT_IP_ADDRESS=$(curl -s https://ipinfo.io/ip)
-    OBJECT_ID=$(getCurrentObjectId)
-    OBJECT_TYPE=$(getCurrentObjectType)
+    CLIENT_IP_ADDRESS=$(curl -s https://ifconfig.me)
+    OBJECT_ID=$(getCurrentUserPrincipalName)
     printProgress "Deploy public Fabric in resource group '${RESOURCE_GROUP_NAME}'"
     DEPLOY_NAME=$(date +"%y%m%d%H%M%S")
     cmd="az deployment group create --resource-group $RESOURCE_GROUP_NAME  --name ${DEPLOY_NAME}   \
@@ -1698,14 +1696,11 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
     env=${AZURE_ENVIRONMENT} \
     visibility=${VISIBILITY} \
     suffix=${AZURE_SUFFIX} \
-    objectId=\"${OBJECT_ID}\"  objectType=\"${OBJECT_TYPE}\"  clientIpAddress=\"${CLIENT_IP_ADDRESS}\"  \
+    objectId=\"${OBJECT_ID}\"  clientIpAddress=\"${CLIENT_IP_ADDRESS}\"  \
     --mode Incremental --verbose"
     printProgress "$cmd"
     eval "$cmd"
     checkError
-
-    purviewPrincipalId=$(az deployment group show --resource-group "$RESOURCE_GROUP_NAME" -n "${DEPLOY_NAME}" --query "properties.outputs" | jq -r '.outPurviewPrincipalId.value')
-    updateConfigurationFile "${CONFIGURATION_FILE}" PURVIEW_PRINCIPAL_ID "${purviewPrincipalId}"
     exit 0
 fi
 
@@ -1729,10 +1724,10 @@ if [ "${ACTION}" = "deploy-public-datasource" ] ; then
     fi
     setAzureResourceNames ${AZURE_ENVIRONMENT} "${VISIBILITY}" "${AZURE_SUFFIX}" "${RESOURCE_GROUP_NAME}"
     if [ -z "${PURVIEW_PRINCIPAL_ID+x}" ] ; then
-        PURVIEW_RESOURCE_GROUP_NAME=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
+        PURVIEW_RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
         PURVIEW_PRINCIPAL_ID=$(az fabric account show -n ${AZURE_PURVIEW_ACCOUNT_NAME} -g ${PURVIEW_RESOURCE_GROUP_NAME} --query identity.principalId -o tsv)
     fi
-    CLIENT_IP_ADDRESS=$(curl -s https://ipinfo.io/ip)
+    CLIENT_IP_ADDRESS=$(curl -s https://ifconfig.me)
     OBJECT_ID=$(getCurrentObjectId)
     OBJECT_TYPE=$(getCurrentObjectType)
 
@@ -1804,7 +1799,7 @@ if [ "${ACTION}" = "deploy-private-fabric" ] ; then
     printProgress "Checking whether the Azure CLI providers and extensions are installed..."
     installPreRequisites
     VISIBILITY="pri"
-    RESOURCE_GROUP_NAME=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
+    RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
     if [ "$(az group exists --name "${RESOURCE_GROUP_NAME}")" = "false" ]; then
         printProgress "Create resource group  '${RESOURCE_GROUP_NAME}' in location '${AZURE_REGION}'"
         cmd="az group create -l ${AZURE_REGION} -n ${RESOURCE_GROUP_NAME}"
@@ -1858,7 +1853,7 @@ if [ "${ACTION}" = "deploy-private-shir" ] ; then
     printProgress "Checking whether the Azure CLI providers and extensions are installed..."
     installPreRequisites
     VISIBILITY="pri"
-    RESOURCE_GROUP_NAME=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
+    RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
     if [ "$(az group exists --name "${RESOURCE_GROUP_NAME}")" = "false" ]; then
         printError "Resource group  '${RESOURCE_GROUP_NAME}' in location '${AZURE_REGION}' doesn't exist, please deploy private Fabric first"
         exit 1
@@ -1930,7 +1925,7 @@ if [ "${ACTION}" = "deploy-private-vnetir" ] ; then
     printProgress "Checking whether the Azure CLI providers and extensions are installed..."
     installPreRequisites
     VISIBILITY="pri"
-    RESOURCE_GROUP_NAME=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
+    RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
     if [ "$(az group exists --name "${RESOURCE_GROUP_NAME}")" = "false" ]; then
         printError "Resource group  '${RESOURCE_GROUP_NAME}' in location '${AZURE_REGION}' doesn't exist, please deploy private Fabric first"
         exit 1
@@ -2005,10 +2000,10 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
     setAzureResourceNames ${AZURE_ENVIRONMENT} "${VISIBILITY}" "${AZURE_SUFFIX}" "${RESOURCE_GROUP_NAME}"
 
     if [ -z "${PURVIEW_PRINCIPAL_ID+x}" ] ; then
-        PURVIEW_RESOURCE_GROUP_NAME=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}""${AZURE_SUFFIX}")
+        PURVIEW_RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}""${AZURE_SUFFIX}")
         PURVIEW_PRINCIPAL_ID=$(az fabric account show -n ${AZURE_PURVIEW_ACCOUNT_NAME} -g ${PURVIEW_RESOURCE_GROUP_NAME} --query identity.principalId -o tsv)
     fi
-    CLIENT_IP_ADDRESS=$(curl -s https://ipinfo.io/ip)
+    CLIENT_IP_ADDRESS=$(curl -s https://ifconfig.me)
     OBJECT_ID=$(getCurrentObjectId)
     OBJECT_TYPE=$(getCurrentObjectType)
 
@@ -2026,7 +2021,7 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
         updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_SYNAPSE_SQL_ADMINISTRATOR_PASSWORD_SECRET_NAME}" "${SYNAPSE_SQL_ADMIN_PASSWORD}"
     fi
 
-    PURVIEW_RESOURCE_GROUP_NAME=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
+    PURVIEW_RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
 
     printProgress "Deploy private datasource in resource group '${RESOURCE_GROUP_NAME}'"
     cmd="az deployment group create --resource-group $RESOURCE_GROUP_NAME \
@@ -2148,7 +2143,7 @@ if [ "${ACTION}" = "scan-private-datasource" ] ; then
     printProgress "Checking whether the Azure CLI providers and extensions are installed..."
     installPreRequisites
     VISIBILITY="pri"
-    RESOURCE_GROUP_NAME=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
+    RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
     if [ "$(az group exists --name "${RESOURCE_GROUP_NAME}")" = "false" ]; then
         printError "Resource group  '${RESOURCE_GROUP_NAME}' in location '${AZURE_REGION}' doesn't exist, please deploy private Fabric first"
         exit 1
@@ -2250,7 +2245,7 @@ if [ "${ACTION}" = "scan-public-datasource" ] ; then
     printProgress "Checking whether the Azure CLI providers and extensions are installed..."
     installPreRequisites
     VISIBILITY="pub"
-    RESOURCE_GROUP_NAME=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
+    RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
     if [ "$(az group exists --name "${RESOURCE_GROUP_NAME}")" = "false" ]; then
         printError "Resource group  '${RESOURCE_GROUP_NAME}' in location '${AZURE_REGION}' doesn't exist, please deploy private Fabric first"
         exit 1
@@ -2349,7 +2344,7 @@ fi
 
 if [ "${ACTION}" = "remove-public-fabric" ] ; then
     VISIBILITY="pub"
-    RESOURCE_GROUP_NAME=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
+    RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
     if [ "$(az group exists --name "${RESOURCE_GROUP_NAME}")" = "true" ]; then
         printProgress "Remove resource group  '${RESOURCE_GROUP_NAME}' in location '${AZURE_REGION}'"
         cmd="az group delete  -n ${RESOURCE_GROUP_NAME} -y"
@@ -2379,7 +2374,7 @@ fi
 
 if [ "${ACTION}" = "remove-private-fabric" ] ; then
     VISIBILITY="pri"
-    RESOURCE_GROUP_NAME=$(getPurviewResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
+    RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
     if [ "$(az group exists --name "${RESOURCE_GROUP_NAME}")" = "true" ]; then
         printProgress "Remove resource group  '${RESOURCE_GROUP_NAME}' in location '${AZURE_REGION}'"
         cmd="az group delete  -n ${RESOURCE_GROUP_NAME} -y"

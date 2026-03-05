@@ -16,9 +16,6 @@ param suffix string = '0000'
 @description('The user object Id of the user or service principal running the script.')
 param objectId string = ''
 
-@description('The  object type User or ServicePrincipal.')
-param objectType string = 'User'
-
 @description('The client IP address.')
 param clientIpAddress string = ''
 
@@ -38,12 +35,13 @@ var tags = {
   suffix: suffix
 }
 
+var fabricSKU = 'F2'
 
 // Azure Key Vault related variables
 var keyVaultName = namingModule.outputs.keyVaultName
 
 // Fabric
-var purviewAccountName = namingModule.outputs.purviewAccountName
+var fabricAccountName = namingModule.outputs.fabricAccountName
 
 module keyVault 'public-keyvault.bicep' = {
   name: 'keyVaultDeploy'
@@ -57,19 +55,17 @@ module keyVault 'public-keyvault.bicep' = {
 }
 
 module fabric 'public-fabric.bicep' = {
-  name: 'PurviewDeploy'
+  name: 'FabricDeploy'
   scope: resourceGroup()
   params: {
     location: location
-    purviewAccountName: purviewAccountName
-    keyVaultName: keyVault.outputs.outKeyVaultName
-    objectId: objectId
-    objectType: objectType
+    fabricAccountName: fabricAccountName
+    fabricSku: fabricSKU
+    fabricAdminId: objectId
     tags: tags
   }
 }
 
 output outKeyVaultName string = keyVault.outputs.outKeyVaultName
 output outPurviewAccountName string = fabric.outputs.outPurviewAccountName
-output outPurviewCatalogUri  string = fabric.outputs.outPurviewCatalogUri
-output outPurviewPrincipalId string = fabric.outputs.outPurviewPrincipalId
+

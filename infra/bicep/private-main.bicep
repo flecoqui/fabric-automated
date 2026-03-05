@@ -161,14 +161,14 @@ module keyVault 'private-keyvault.bicep' = {
 }
 
 module fabric 'private-fabric.bicep' = {
-  name: 'PurviewDeploy'
+  name: 'FabricDeploy'
   scope: resourceGroup()
   params: {
     location: location
     baseName: baseName
     vnetName: network.outputs.outVnetName
     subnetName: network.outputs.outPrivateEndpointSubnetName
-    purviewAccountName: purviewAccountName
+    fabricAccountName: fabricAccountName
     keyVaultName: keyVault.outputs.outKeyVaultName
     namespacePrivateDnsZoneId: namespacePrivateDnsZoneId
     portalPrivateDnsZoneId: portalPrivateDnsZoneId
