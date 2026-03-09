@@ -105,7 +105,7 @@ module storage 'private-storage.bicep' = {
   }
 }
 
-module synapse 'private-synapse-workspace.bicep' = {
+module synapse 'private-postgresql.bicep' = {
   name: 'SynapseDeploy'
   scope: resourceGroup()
   params: {

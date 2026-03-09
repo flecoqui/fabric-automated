@@ -145,7 +145,7 @@ setAzureResourceNames()
     #printProgress "$cmd"
     RESULT=$(eval "$cmd")
     checkError
-    # printProgress "RESULT: $RESULT"
+    printProgress "RESULT: $RESULT"
 
     AZURE_VNET_NAME=$(echo ${RESULT}  | jq -r '.vnetName.value' 2>/dev/null)
     echo "AZURE_VNET_NAME: $AZURE_VNET_NAME"
@@ -158,12 +158,20 @@ setAzureResourceNames()
     AZURE_DNS_DELEGATION_SUBNET_NAME=$(echo ${RESULT}  | jq -r '.dnsDelegationSubNetName.value' 2>/dev/null)
     echo "AZURE_DNS_DELEGATION_SUBNET_NAME: $AZURE_DNS_DELEGATION_SUBNET_NAME"
 
-    AZURE_PURVIEW_ACCOUNT_NAME=$(echo ${RESULT}  | jq -r '.purviewAccountName.value' 2>/dev/null)
-    echo "AZURE_PURVIEW_ACCOUNT_NAME: $AZURE_PURVIEW_ACCOUNT_NAME"
+    AZURE_FABRIC_ACCOUNT_NAME=$(echo ${RESULT}  | jq -r '.fabricAccountName.value' 2>/dev/null)
+    echo "AZURE_FABRIC_ACCOUNT_NAME: $AZURE_FABRIC_ACCOUNT_NAME"
+    AZURE_FABRIC_WORKSPACE_NAME=$(echo ${RESULT}  | jq -r '.fabricWorkspaceName.value' 2>/dev/null)
+    echo "AZURE_FABRIC_WORKSPACE_NAME: $AZURE_FABRIC_WORKSPACE_NAME"
+
     AZURE_STORAGE_ACCOUNT_NAME=$(echo ${RESULT}  | jq -r '.storageAccountName.value' 2>/dev/null)
     echo "AZURE_STORAGE_ACCOUNT_NAME: $AZURE_STORAGE_ACCOUNT_NAME"
     AZURE_STORAGE_ACCOUNT_DEFAULT_CONTAINER_NAME=$(echo ${RESULT}  | jq -r '.storageAccountDefaultContainerName.value' 2>/dev/null)
     echo "AZURE_STORAGE_ACCOUNT_DEFAULT_CONTAINER_NAME: $AZURE_STORAGE_ACCOUNT_DEFAULT_CONTAINER_NAME"
+    AZURE_COSMOS_DB_NAME=$(echo ${RESULT}  | jq -r '.cosmosDBName.value' 2>/dev/null)
+    echo "AZURE_COSMOS_DB_NAME: $AZURE_COSMOS_DB_NAME"
+    AZURE_POSTGRESQL_NAME=$(echo ${RESULT}  | jq -r '.postgreSqlServerName.value' 2>/dev/null)
+    echo "AZURE_POSTGRESQL_NAME: $AZURE_POSTGRESQL_NAME"
+    
     AZURE_KEY_VAULT_NAME=$(echo ${RESULT}  | jq -r '.keyVaultName.value' 2>/dev/null)
     echo "AZURE_KEY_VAULT_NAME: $AZURE_KEY_VAULT_NAME"
 
@@ -197,39 +205,13 @@ setAzureResourceNames()
     echo "AZURE_PURVIEW_SHIR_VM_LOGIN_SECRET_NAME: $AZURE_PURVIEW_SHIR_VM_LOGIN_SECRET_NAME"
     AZURE_PURVIEW_SHIR_VM_PASSWORD_SECRET_NAME=$(echo ${RESULT}  | jq -r '.purviewShirVMPassSecretName.value' 2>/dev/null)
     echo "AZURE_PURVIEW_SHIR_VM_PASSWORD_SECRET_NAME: $AZURE_PURVIEW_SHIR_VM_PASSWORD_SECRET_NAME"
-    AZURE_SYNAPSE_WORKSPACE_NAME=$(echo ${RESULT}  | jq -r '.synapseWorkspaceName.value' 2>/dev/null)
-    echo "AZURE_SYNAPSE_WORKSPACE_NAME: $AZURE_SYNAPSE_WORKSPACE_NAME"
-    AZURE_SYNAPSE_STORAGE_ACCOUNT_NAME=$(echo ${RESULT}  | jq -r '.synapseStorageAccountName.value' 2>/dev/null)
-    echo "AZURE_SYNAPSE_STORAGE_ACCOUNT_NAME: $AZURE_SYNAPSE_STORAGE_ACCOUNT_NAME"
-    AZURE_SYNAPSE_FILE_SYSTEM_NAME=$(echo ${RESULT}  | jq -r '.synapseFileSystemName.value' 2>/dev/null)
-    echo "AZURE_SYNAPSE_FILE_SYSTEM_NAME: $AZURE_SYNAPSE_FILE_SYSTEM_NAME"
-    AZURE_SYNAPSE_SQL_ADMINISTRATOR_LOGIN_SECRET_NAME=$(echo ${RESULT}  | jq -r '.synapseSqlAdministratorLoginSecretName.value' 2>/dev/null)
-    echo "AZURE_SYNAPSE_SQL_ADMINISTRATOR_LOGIN_SECRET_NAME: $AZURE_SYNAPSE_SQL_ADMINISTRATOR_LOGIN_SECRET_NAME"
-    AZURE_SYNAPSE_SQL_ADMINISTRATOR_PASSWORD_SECRET_NAME=$(echo ${RESULT}  | jq -r '.synapseSqlAdministratorPassSecretName.value' 2>/dev/null)
-    echo "AZURE_SYNAPSE_SQL_ADMINISTRATOR_PASSWORD_SECRET_NAME: $AZURE_SYNAPSE_SQL_ADMINISTRATOR_PASSWORD_SECRET_NAME"
-    AZURE_SYNAPSE_SQL_POOL_NAME=$(echo ${RESULT}  | jq -r '.synapseSqlPoolName.value' 2>/dev/null)
-    echo "AZURE_SYNAPSE_SQL_POOL_NAME: $AZURE_SYNAPSE_SQL_POOL_NAME"
-    AZURE_SYNAPSE_SQL_POOL_SKU=$(echo ${RESULT}  | jq -r '.synapseSqlPoolSku.value' 2>/dev/null)
-    echo "AZURE_SYNAPSE_SQL_POOL_SKU: $AZURE_SYNAPSE_SQL_POOL_SKU"
-    AZURE_SYNAPSE_SPARK_POOL_NAME=$(echo ${RESULT}  | jq -r '.synapseSparkPoolName.value' 2>/dev/null)
-    echo   "AZURE_SYNAPSE_SPARK_POOL_NAME: $AZURE_SYNAPSE_SPARK_POOL_NAME"
-    AZURE_SYNAPSE_SPARK_POOL_NODE_SIZE=$(echo ${RESULT}  | jq -r '.synapseSparkPoolNodeSize.value' 2>/dev/null)
-    echo   "AZURE_SYNAPSE_SPARK_POOL_NODE_SIZE: $AZURE_SYNAPSE_SPARK_POOL_NODE_SIZE"
-    AZURE_SYNAPSE_SPARK_POOL_MIN_NODE_COUNT=$(echo ${RESULT}  | jq -r '.synapseSparkPoolMinNodeCount.value' 2>/dev/null)
-    echo "AZURE_SYNAPSE_SPARK_POOL_MIN_NODE_COUNT: $AZURE_SYNAPSE_SPARK_POOL_MIN_NODE_COUNT"
-    AZURE_SYNAPSE_SPARK_POOL_MAX_NODE_COUNT=$(echo ${RESULT}  | jq -r '.synapseSparkPoolMaxNodeCount.value' 2>/dev/null)
-    echo "AZURE_SYNAPSE_SPARK_POOL_MAX_NODE_COUNT: $AZURE_SYNAPSE_SPARK_POOL_MAX_NODE_COUNT"
-    AZURE_SYNAPSE_SPARK_POOL_AUTO_SCALE_ENABLED=$(echo ${RESULT}  | jq -r '.synapseSparkPoolAutoScaleEnabled.value' 2>/dev/null)
-    echo "AZURE_SYNAPSE_SPARK_POOL_AUTO_SCALE_ENABLED: $AZURE_SYNAPSE_SPARK_POOL_AUTO_SCALE_ENABLED"
-    AZURE_SYNAPSE_SPARK_POOL_AUTO_PAUSE_ENABLED=$(echo ${RESULT}  | jq -r '.synapseSparkPoolAutoPauseEnabled.value' 2>/dev/null)
-    echo "AZURE_SYNAPSE_SPARK_POOL_AUTO_PAUSE_ENABLED: $AZURE_SYNAPSE_SPARK_POOL_AUTO_PAUSE_ENABLED"
-    AZURE_SYNAPSE_SPARK_POOL_AUTO_PAUSE_DELAY_IN_MINUTES=$(echo ${RESULT}  | jq -r '.synapseSparkPoolAutoPauseDelayInMinutes.value' 2>/dev/null)
-    echo "AZURE_SYNAPSE_SPARK_POOL_AUTO_PAUSE_DELAY_IN_MINUTES: $AZURE_SYNAPSE_SPARK_POOL_AUTO_PAUSE_DELAY_IN_MINUTES"
-    AZURE_SYNAPSE_SPARK_POOL_VERSION=$(echo ${RESULT}  | jq -r '.synapseSparkVersion.value' 2>/dev/null)
-    echo "AZURE_SYNAPSE_SPARK_POOL_VERSION: $AZURE_SYNAPSE_SPARK_POOL_VERSION"
+    AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME=$(echo ${RESULT}  | jq -r '.postgreSqlAdministratorLoginSecretName.value' 2>/dev/null)
+    echo "AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME: $AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME"
+    AZURE_POSTGRESQL_ADMINISTRATOR_PASSWORD_SECRET_NAME=$(echo ${RESULT}  | jq -r '.postgreSqlAdministratorPassSecretName.value' 2>/dev/null)
+    echo "AZURE_POSTGRESQL_ADMINISTRATOR_PASSWORD_SECRET_NAME: $AZURE_POSTGRESQL_ADMINISTRATOR_PASSWORD_SECRET_NAME"
 
-    AZURE_RESOURCE_GROUP_PURVIEW_NAME=$(echo ${RESULT}  | jq -r '.resourceGroupPurviewName.value' 2>/dev/null)
-    echo "AZURE_RESOURCE_GROUP_PURVIEW_NAME: $AZURE_RESOURCE_GROUP_PURVIEW_NAME"
+    AZURE_RESOURCE_GROUP_FABRIC_NAME=$(echo ${RESULT}  | jq -r '.resourceGroupFabricName.value' 2>/dev/null)
+    echo "AZURE_RESOURCE_GROUP_FABRIC_NAME: $AZURE_RESOURCE_GROUP_FABRIC_NAME"
     AZURE_RESOURCE_GROUP_DATASOURCE_NAME=$(echo ${RESULT}  | jq -r '.resourceGroupDatasourceName.value' 2>/dev/null)
     echo "AZURE_RESOURCE_GROUP_DATASOURCE_NAME: $AZURE_RESOURCE_GROUP_DATASOURCE_NAME"
 }
@@ -590,6 +572,60 @@ getCurrentObjectType() {
   fi
   echo "$ObjectType"
 }
+##############################################################################
+#- createFabricWorkspace
+##############################################################################
+createFabricWorkspace() {
+  TOKEN=$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)
+  WORKSPACE_NAME=$1
+  curl --request POST \
+    --url "https://api.fabric.microsoft.com/v1/workspaces" \
+    --header "Authorization: Bearer $TOKEN" \
+    --header "Content-Type: application/json" \
+    --fail --silent --show-error \
+    --data "{\"displayName\": \"${WORKSPACE_NAME}\"}"    
+}
+##############################################################################
+#- getFabricWorkspaceId
+##############################################################################
+getFabricWorkspaceId() {
+TOKEN=$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)
+  WORKSPACE_NAME=$1
+  curl --request GET \
+    --url "https://api.fabric.microsoft.com/v1/workspaces" \
+    --header "Authorization: Bearer $TOKEN" \
+    --header "Content-Type: application/json" \
+    --fail --silent --show-error | jq -r ".value[] | select(.displayName==\"${WORKSPACE_NAME}\") | .id"     
+}
+##############################################################################
+#- createFabricWorkspaceIdentity
+##############################################################################
+createFabricWorkspaceIdentity() {
+WORKSPACE_ID=$1
+TOKEN=$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)
+
+curl --request POST \
+    --url "https://api.fabric.microsoft.com/v1/workspaces/${WORKSPACE_ID}/provisionIdentity" \
+    --header "Authorization: Bearer $TOKEN" \
+    --header "Content-Type: application/json" \
+    --data '' \
+    --fail --silent --show-error 
+}
+
+##############################################################################
+#- getFabricWorkspaceIdentity
+##############################################################################
+getFabricWorkspaceIdentity() {
+  WORKSPACE_ID=$1
+  TOKEN=$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)
+
+  curl --request GET \
+    --url "https://api.fabric.microsoft.com/v1/workspaces/${WORKSPACE_ID}" \
+    --header "Authorization: Bearer $TOKEN" \
+    --header "Content-Type: application/json" \
+    --fail --silent --show-error | jq -r '.workspaceIdentity.servicePrincipalId'
+}
+
 ##############################################################################
 #- getPurviewToken
 ##############################################################################
@@ -1686,7 +1722,9 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
     setAzureResourceNames ${AZURE_ENVIRONMENT} "${VISIBILITY}" "${AZURE_SUFFIX}" "${RESOURCE_GROUP_NAME}"
 
     CLIENT_IP_ADDRESS=$(curl -s https://ifconfig.me)
-    OBJECT_ID=$(getCurrentUserPrincipalName)
+    OBJECT_ID=$(getCurrentObjectId)
+    OBJECT_TYPE=$(getCurrentObjectType)
+    PRINCIPAL_NAME=$(getCurrentUserPrincipalName)
     printProgress "Deploy public Fabric in resource group '${RESOURCE_GROUP_NAME}'"
     DEPLOY_NAME=$(date +"%y%m%d%H%M%S")
     cmd="az deployment group create --resource-group $RESOURCE_GROUP_NAME  --name ${DEPLOY_NAME}   \
@@ -1696,11 +1734,38 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
     env=${AZURE_ENVIRONMENT} \
     visibility=${VISIBILITY} \
     suffix=${AZURE_SUFFIX} \
-    objectId=\"${OBJECT_ID}\"  clientIpAddress=\"${CLIENT_IP_ADDRESS}\"  \
+    objectId=\"${OBJECT_ID}\" objectType=\"${OBJECT_TYPE}\" principalName=\"${PRINCIPAL_NAME}\"   clientIpAddress=\"${CLIENT_IP_ADDRESS}\"  \
     --mode Incremental --verbose"
     printProgress "$cmd"
     eval "$cmd"
     checkError
+
+    if [ -n "${AZURE_FABRIC_WORKSPACE_NAME}" ]; then
+        WORKSPACE_ID=$(getFabricWorkspaceId "${AZURE_FABRIC_WORKSPACE_NAME}")
+        if [ -z "${WORKSPACE_ID}" ]; then
+            printProgress "Creating Fabric workspace with name ${AZURE_FABRIC_WORKSPACE_NAME}"
+            createFabricWorkspace "${AZURE_FABRIC_WORKSPACE_NAME}"
+            WORKSPACE_ID=$(getFabricWorkspaceId "${AZURE_FABRIC_WORKSPACE_NAME}")
+        fi
+        if [ -z "${WORKSPACE_ID}" ]; then
+            printError "Cannot get Fabric workspace ID for workspace name ${AZURE_FABRIC_WORKSPACE_NAME}"
+            exit 1
+        fi
+        printProgress "Fabric workspace with name ${AZURE_FABRIC_WORKSPACE_NAME} id is ${WORKSPACE_ID}"
+        WORKSPACE_IDENTITY=$(getFabricWorkspaceIdentity "${WORKSPACE_ID}")
+        if [ -z "${WORKSPACE_IDENTITY}" ] || [ "${WORKSPACE_IDENTITY}" = "null" ]; then
+            printProgress "Creating Fabric workspace identity for workspace name ${AZURE_FABRIC_WORKSPACE_NAME}"
+            createFabricWorkspaceIdentity "${WORKSPACE_ID}"
+            sleep 10
+            WORKSPACE_IDENTITY=$(getFabricWorkspaceIdentity "${WORKSPACE_ID}")
+        fi
+        if [ -z "${WORKSPACE_IDENTITY}" ] || [ "${WORKSPACE_IDENTITY}" = "null" ]; then
+            printError "Cannot get Fabric workspace identity for workspace name ${AZURE_FABRIC_WORKSPACE_NAME}"
+            exit 1
+        fi
+        printProgress "Fabric workspace with name ${AZURE_FABRIC_WORKSPACE_NAME} and id ${WORKSPACE_ID} has identity ${WORKSPACE_IDENTITY}"
+    fi
+
     exit 0
 fi
 
@@ -1723,29 +1788,43 @@ if [ "${ACTION}" = "deploy-public-datasource" ] ; then
         printProgress "Resource group '${RESOURCE_GROUP_NAME}' already exists"
     fi
     setAzureResourceNames ${AZURE_ENVIRONMENT} "${VISIBILITY}" "${AZURE_SUFFIX}" "${RESOURCE_GROUP_NAME}"
-    if [ -z "${PURVIEW_PRINCIPAL_ID+x}" ] ; then
-        PURVIEW_RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
-        PURVIEW_PRINCIPAL_ID=$(az fabric account show -n ${AZURE_PURVIEW_ACCOUNT_NAME} -g ${PURVIEW_RESOURCE_GROUP_NAME} --query identity.principalId -o tsv)
+    if [ -z "${AZURE_FABRIC_WORKSPACE_IDENTITY+x}" ] ; then
+        if [ -n "${AZURE_FABRIC_WORKSPACE_NAME}" ]; then
+            AZURE_FABRIC_WORKSPACE_ID=$(getFabricWorkspaceId "${AZURE_FABRIC_WORKSPACE_NAME}")
+            if [ -z "${AZURE_FABRIC_WORKSPACE_ID}" ]; then
+                printError "Cannot get Fabric workspace ID for workspace name ${AZURE_FABRIC_WORKSPACE_NAME}"
+                exit 1
+            fi
+            printProgress "Fabric workspace with name ${AZURE_FABRIC_WORKSPACE_NAME} id is ${AZURE_FABRIC_WORKSPACE_ID}"
+            AZURE_FABRIC_WORKSPACE_IDENTITY=$(getFabricWorkspaceIdentity "${AZURE_FABRIC_WORKSPACE_ID}")
+            if [ -z "${AZURE_FABRIC_WORKSPACE_IDENTITY}" ] || [ "${AZURE_FABRIC_WORKSPACE_IDENTITY}" = "null" ]; then
+                printError "Cannot get Fabric workspace identity for workspace name ${AZURE_FABRIC_WORKSPACE_NAME}"
+                exit 1
+            fi
+            printProgress "Fabric workspace with name ${AZURE_FABRIC_WORKSPACE_NAME} and id ${AZURE_FABRIC_WORKSPACE_ID} has identity ${AZURE_FABRIC_WORKSPACE_IDENTITY}"
+        fi
     fi
+
+
     CLIENT_IP_ADDRESS=$(curl -s https://ifconfig.me)
     OBJECT_ID=$(getCurrentObjectId)
     OBJECT_TYPE=$(getCurrentObjectType)
 
     printProgress "Reading Synapse SQL Administrator login from Key Vault  ${AZURE_KEY_VAULT_NAME}"
-    SYNAPSE_SQL_ADMIN_LOGIN=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_SYNAPSE_SQL_ADMINISTRATOR_LOGIN_SECRET_NAME}")
-    if [ -z "${SYNAPSE_SQL_ADMIN_LOGIN}" ]; then
+    POSTGRESQL_ADMIN_LOGIN=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME}")
+    if [ -z "${POSTGRESQL_ADMIN_LOGIN}" ]; then
         printProgress "Writing Synapse SQL Administrator login to Key Vault  ${AZURE_KEY_VAULT_NAME}"
-        SYNAPSE_SQL_ADMIN_LOGIN="${DEFAULT_SYNAPSE_SQL_ADMIN_USERNAME}"
-        updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_SYNAPSE_SQL_ADMINISTRATOR_LOGIN_SECRET_NAME}" "${SYNAPSE_SQL_ADMIN_LOGIN}"
+        POSTGRESQL_ADMIN_LOGIN="${DEFAULT_SYNAPSE_SQL_ADMIN_USERNAME}"
+        updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME}" "${POSTGRESQL_ADMIN_LOGIN}"
     else
         printProgress "Using existing Synapse SQL Administrator login from Key Vault  ${AZURE_KEY_VAULT_NAME}"
     fi
     printProgress "Reading Synapse SQL Administrator password from Key Vault  ${AZURE_KEY_VAULT_NAME}"
-    SYNAPSE_SQL_ADMIN_PASSWORD=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_SYNAPSE_SQL_ADMINISTRATOR_PASSWORD_SECRET_NAME}")
-    if [ -z "${SYNAPSE_SQL_ADMIN_PASSWORD}" ]; then
+    POSTGRESQL_ADMIN_PASSWORD=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_PASSWORD_SECRET_NAME}")
+    if [ -z "${POSTGRESQL_ADMIN_PASSWORD}" ]; then
         printProgress "Generating and storing Synapse SQL Administrator password in Key Vault  ${AZURE_KEY_VAULT_NAME}"
-        SYNAPSE_SQL_ADMIN_PASSWORD=$(tr -dc 'A-Za-z0-9!?%=' < /dev/urandom | head -c 12)$(tr -dc '[:upper:]' < /dev/urandom  | head -c1)$(tr -dc '[:lower:]' < /dev/urandom  | head -c1)$(tr -dc '0-9' < /dev/urandom  | head -c1)
-        updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_SYNAPSE_SQL_ADMINISTRATOR_PASSWORD_SECRET_NAME}" "${SYNAPSE_SQL_ADMIN_PASSWORD}"
+        POSTGRESQL_ADMIN_PASSWORD=$(tr -dc 'A-Za-z0-9!?%=' < /dev/urandom | head -c 12)$(tr -dc '[:upper:]' < /dev/urandom  | head -c1)$(tr -dc '[:lower:]' < /dev/urandom  | head -c1)$(tr -dc '0-9' < /dev/urandom  | head -c1)
+        updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_PASSWORD_SECRET_NAME}" "${POSTGRESQL_ADMIN_PASSWORD}"
     fi
 
     printProgress "Deploy public datasource in resource group '${RESOURCE_GROUP_NAME}'"
@@ -1757,9 +1836,9 @@ if [ "${ACTION}" = "deploy-public-datasource" ] ; then
     env=${AZURE_ENVIRONMENT} \
     visibility=${VISIBILITY} \
     suffix=${AZURE_SUFFIX} \
-    sqlAdministratorLogin=\"${SYNAPSE_SQL_ADMIN_LOGIN}\" \
-    sqlAdministratorPassword=\"${SYNAPSE_SQL_ADMIN_PASSWORD}\" \
-    purviewPrincipalId=\"${PURVIEW_PRINCIPAL_ID}\" \
+    sqlAdministratorLogin=\"${POSTGRESQL_ADMIN_LOGIN}\" \
+    sqlAdministratorPassword=\"${POSTGRESQL_ADMIN_PASSWORD}\" \
+    purviewPrincipalId=\"${AZURE_FABRIC_WORKSPACE_IDENTITY}\" \
     objectId=\"${OBJECT_ID}\"  objectType=\"${OBJECT_TYPE}\"  \
     clientIpAddress=\"${CLIENT_IP_ADDRESS}\" --mode Incremental --verbose"
     printProgress "$cmd"
@@ -1771,25 +1850,39 @@ if [ "${ACTION}" = "deploy-public-datasource" ] ; then
     printProgress "$cmd"
     eval "$cmd"
 
-    printProgress "Upload dataset in storage account '${AZURE_SYNAPSE_STORAGE_ACCOUNT_NAME}' under container '${AZURE_SYNAPSE_FILE_SYSTEM_NAME}'"
-    cmd="az storage blob upload-batch --account-name ${AZURE_SYNAPSE_STORAGE_ACCOUNT_NAME} --destination ${AZURE_SYNAPSE_FILE_SYSTEM_NAME} --destination-path files/data --source $SCRIPTS_DIRECTORY/data/products --overwrite --auth-mode login"
-    printProgress "$cmd"
-    eval "$cmd"
-
     SQLCMD_PATH=$(command -v sqlcmd 2>/dev/null)
     printProgress "Checking if sqlcmd is installed"
     if [ ! -n "$SQLCMD_PATH" ]; then
         printProgress "Installing sqlcmd"
         installSqlcmd
     fi
-    printProgress "Creating Product table 'Product' in Synapse SQL Pool database '$AZURE_SYNAPSE_SQL_POOL_NAME'"
-    cmd="sqlcmd -S \"$AZURE_SYNAPSE_WORKSPACE_NAME.sql.azuresynapse.net\" \
-        -U \"$SYNAPSE_SQL_ADMIN_LOGIN\" \
-        -P \"$SYNAPSE_SQL_ADMIN_PASSWORD\" \
-        -d \"$AZURE_SYNAPSE_SQL_POOL_NAME\" \
-        -C \
-        -I \
-        -i $SCRIPTS_DIRECTORY/data/products/setup.sql"
+    printProgress "Creating Product table 'Product' in PostgreSQL  database '$AZURE_POSTGRESQL_NAME'"
+    # cmd="sqlcmd -S \"$AZURE_POSTGRESQL_NAME.postgres.database.azure.com\" \
+    #     -U \"$POSTGRESQL_ADMIN_LOGIN\" \
+    #     -P \"$POSTGRESQL_ADMIN_PASSWORD\" \
+    #     -d \"$AZURE_POSTGRESQL_NAME\" \
+    #     -C \
+    #     -I \
+    #     -i $SCRIPTS_DIRECTORY/data/products/setup.sql"
+    POSTGRESQL_DATABASE="products"
+    cmd="PGPASSWORD=$POSTGRESQL_ADMIN_PASSWORD  \
+        psql \
+            -h \"$AZURE_POSTGRESQL_NAME.postgres.database.azure.com\" \
+            -U \"$POSTGRESQL_ADMIN_LOGIN\" \
+            -d \"postgres\" \
+            -c \"CREATE DATABASE $POSTGRESQL_DATABASE;\""
+    #printProgress "$cmd"
+    eval "$cmd"
+
+    cmd="PGPASSWORD=$POSTGRESQL_ADMIN_PASSWORD  \
+            psql \
+            -h \"$AZURE_POSTGRESQL_NAME.postgres.database.azure.com\" \
+            -U \"$POSTGRESQL_ADMIN_LOGIN\" \
+            -d \"$POSTGRESQL_DATABASE\" \
+            -v ON_ERROR_STOP=1 \
+            -f \"$SCRIPTS_DIRECTORY/data/products/setup.sql\""
+    
+    #printProgress "$cmd"
     eval "$cmd"
 
     exit 0
@@ -1845,7 +1938,7 @@ if [ "${ACTION}" = "deploy-private-fabric" ] ; then
     checkError
 
     purviewPrincipalId=$(az deployment group show --resource-group "$RESOURCE_GROUP_NAME" -n "${DEPLOY_NAME}" --query "properties.outputs" | jq -r '.outPurviewPrincipalId.value')
-    updateConfigurationFile "${CONFIGURATION_FILE}" PURVIEW_PRINCIPAL_ID "${purviewPrincipalId}"
+    updateConfigurationFile "${CONFIGURATION_FILE}" FABRIC_PRINCIPAL_ID "${purviewPrincipalId}"
     exit 0
 fi
 
@@ -1999,29 +2092,29 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
     fi
     setAzureResourceNames ${AZURE_ENVIRONMENT} "${VISIBILITY}" "${AZURE_SUFFIX}" "${RESOURCE_GROUP_NAME}"
 
-    if [ -z "${PURVIEW_PRINCIPAL_ID+x}" ] ; then
-        PURVIEW_RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}""${AZURE_SUFFIX}")
-        PURVIEW_PRINCIPAL_ID=$(az fabric account show -n ${AZURE_PURVIEW_ACCOUNT_NAME} -g ${PURVIEW_RESOURCE_GROUP_NAME} --query identity.principalId -o tsv)
+    if [ -z "${FABRIC_PRINCIPAL_ID+x}" ] ; then
+        FABRIC_RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}""${AZURE_SUFFIX}")
+        FABRIC_PRINCIPAL_ID=$(az fabric account show -n ${AZURE_PURVIEW_ACCOUNT_NAME} -g ${FABRIC_RESOURCE_GROUP_NAME} --query identity.principalId -o tsv)
     fi
     CLIENT_IP_ADDRESS=$(curl -s https://ifconfig.me)
     OBJECT_ID=$(getCurrentObjectId)
     OBJECT_TYPE=$(getCurrentObjectType)
 
-    SYNAPSE_SQL_ADMIN_LOGIN=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_SYNAPSE_SQL_ADMINISTRATOR_LOGIN_SECRET_NAME}")
-    if [ -z "${SYNAPSE_SQL_ADMIN_LOGIN}" ]; then
-        SYNAPSE_SQL_ADMIN_LOGIN="${DEFAULT_SYNAPSE_SQL_ADMIN_USERNAME}"
-        updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_SYNAPSE_SQL_ADMINISTRATOR_LOGIN_SECRET_NAME}" "${SYNAPSE_SQL_ADMIN_LOGIN}"
+    POSTGRESQL_ADMIN_LOGIN=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME}")
+    if [ -z "${POSTGRESQL_ADMIN_LOGIN}" ]; then
+        POSTGRESQL_ADMIN_LOGIN="${DEFAULT_SYNAPSE_SQL_ADMIN_USERNAME}"
+        updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME}" "${POSTGRESQL_ADMIN_LOGIN}"
     else
         printProgress "Using existing Synapse SQL Administrator login from Key Vault  ${AZURE_KEY_VAULT_NAME}"
     fi
-    SYNAPSE_SQL_ADMIN_PASSWORD=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_SYNAPSE_SQL_ADMINISTRATOR_PASSWORD_SECRET_NAME}")
-    if [ -z "${SYNAPSE_SQL_ADMIN_PASSWORD}" ]; then
+    POSTGRESQL_ADMIN_PASSWORD=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_PASSWORD_SECRET_NAME}")
+    if [ -z "${POSTGRESQL_ADMIN_PASSWORD}" ]; then
         printProgress "Generating and storing Synapse SQL Administrator password in Key Vault  ${AZURE_KEY_VAULT_NAME}"
-        SYNAPSE_SQL_ADMIN_PASSWORD=$(tr -dc 'A-Za-z0-9!?%=' < /dev/urandom | head -c 12)$(tr -dc '[:upper:]' < /dev/urandom  | head -c1)$(tr -dc '[:lower:]' < /dev/urandom  | head -c1)$(tr -dc '0-9' < /dev/urandom  | head -c1)
-        updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_SYNAPSE_SQL_ADMINISTRATOR_PASSWORD_SECRET_NAME}" "${SYNAPSE_SQL_ADMIN_PASSWORD}"
+        POSTGRESQL_ADMIN_PASSWORD=$(tr -dc 'A-Za-z0-9!?%=' < /dev/urandom | head -c 12)$(tr -dc '[:upper:]' < /dev/urandom  | head -c1)$(tr -dc '[:lower:]' < /dev/urandom  | head -c1)$(tr -dc '0-9' < /dev/urandom  | head -c1)
+        updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_PASSWORD_SECRET_NAME}" "${POSTGRESQL_ADMIN_PASSWORD}"
     fi
 
-    PURVIEW_RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
+    FABRIC_RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
 
     printProgress "Deploy private datasource in resource group '${RESOURCE_GROUP_NAME}'"
     cmd="az deployment group create --resource-group $RESOURCE_GROUP_NAME \
@@ -2033,10 +2126,10 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
     suffix=${AZURE_SUFFIX} \
     dnsZoneSubscriptionId=\"${AZURE_SUBSCRIPTION_ID}\" \
     newOrExistingDnsZones=\"existing\" \
-    dnsZoneResourceGroupName=\"${PURVIEW_RESOURCE_GROUP_NAME}\" \
-    sqlAdministratorLogin=\"${SYNAPSE_SQL_ADMIN_LOGIN}\" \
-    sqlAdministratorPassword=\"${SYNAPSE_SQL_ADMIN_PASSWORD}\" \
-    purviewPrincipalId=\"${PURVIEW_PRINCIPAL_ID}\" \
+    dnsZoneResourceGroupName=\"${FABRIC_RESOURCE_GROUP_NAME}\" \
+    sqlAdministratorLogin=\"${POSTGRESQL_ADMIN_LOGIN}\" \
+    sqlAdministratorPassword=\"${POSTGRESQL_ADMIN_PASSWORD}\" \
+    purviewPrincipalId=\"${FABRIC_PRINCIPAL_ID}\" \
     objectId=\"${OBJECT_ID}\"  objectType=\"${OBJECT_TYPE}\"  \
     clientIpAddress=\"${CLIENT_IP_ADDRESS}\" --mode Incremental --verbose"
     printProgress "$cmd"
@@ -2103,8 +2196,8 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
     fi
     printProgress "Creating Product table 'Product' in Synapse SQL Pool database '$AZURE_SYNAPSE_SQL_POOL_NAME'"
     cmd="sqlcmd -S \"$AZURE_SYNAPSE_WORKSPACE_NAME.sql.azuresynapse.net\" \
-        -U \"$SYNAPSE_SQL_ADMIN_LOGIN\" \
-        -P \"$SYNAPSE_SQL_ADMIN_PASSWORD\" \
+        -U \"$POSTGRESQL_ADMIN_LOGIN\" \
+        -P \"$POSTGRESQL_ADMIN_PASSWORD\" \
         -d \"$AZURE_SYNAPSE_SQL_POOL_NAME\" \
         -C \
         -I \
@@ -2119,7 +2212,7 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
     AZURE_SYNAPSE_WORKSPACE_NAME=$(echo ${RESULT}  | jq -r '.synapseWorkspaceName.value' 2>/dev/null)
     AZURE_SYNAPSE_STORAGE_ACCOUNT_NAME=$(echo ${RESULT}  | jq -r '.synapseStorageAccountName.value' 2>/dev/null)
     
-    AZURE_RESOURCE_GROUP_PURVIEW_NAME=$(echo ${RESULT}  | jq -r '.resourceGroupPurviewName.value' 2>/dev/null)
+    AZURE_RESOURCE_GROUP_PURVIEW_NAME=$(echo ${RESULT}  | jq -r '.resourceGroupFabricName.value' 2>/dev/null)
     AZURE_RESOURCE_GROUP_DATASOURCE_NAME=$(echo ${RESULT}  | jq -r '.resourceGroupDatasourceName.value' 2>/dev/null)
 
     printProgress "Creating Managed Private Endpoints for Fabric ${AZURE_PURVIEW_ACCOUNT_NAME}"

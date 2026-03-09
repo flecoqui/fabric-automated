@@ -13,11 +13,18 @@ param visibility string = 'pub'
 @maxLength(4)
 param suffix string = '0000'
 
+@description('The principal name of the user or service principal running the script.')
+param principalName string = ''
+
 @description('The user object Id of the user or service principal running the script.')
 param objectId string = ''
 
+@description('The  object type User or ServicePrincipal.')
+param objectType string = 'User'
+
 @description('The client IP address.')
 param clientIpAddress string = ''
+
 
 module namingModule 'naming-convention.bicep' = {
   name: 'namingModule'
@@ -43,29 +50,31 @@ var keyVaultName = namingModule.outputs.keyVaultName
 // Fabric
 var fabricAccountName = namingModule.outputs.fabricAccountName
 
-module keyVault 'public-keyvault.bicep' = {
+module keyVaultModule 'public-keyvault.bicep' = {
   name: 'keyVaultDeploy'
   scope: resourceGroup()
   params: {
     location: location
     keyVaultName: keyVaultName
     clientIpAddress: clientIpAddress
+    objectId: objectId
+    objectType: objectType
     tags: tags
   }
 }
 
-module fabric 'public-fabric.bicep' = {
+module fabricModule 'public-fabric.bicep' = {
   name: 'FabricDeploy'
   scope: resourceGroup()
   params: {
     location: location
     fabricAccountName: fabricAccountName
     fabricSku: fabricSKU
-    fabricAdminId: objectId
+    fabricAdminId: principalName
     tags: tags
   }
 }
 
-output outKeyVaultName string = keyVault.outputs.outKeyVaultName
-output outPurviewAccountName string = fabric.outputs.outPurviewAccountName
+output outKeyVaultName string = keyVaultModule.outputs.outKeyVaultName
+output outPurviewAccountName string = fabricModule.outputs.outPurviewAccountName
 

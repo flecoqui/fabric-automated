@@ -48,8 +48,21 @@ var tags = {
   suffix: suffix
 }
 
+// Azure Key Vault related variables
+// var keyVaultName = namingModule.outputs.keyVaultName
 
-module storage 'public-storage.bicep' = {
+// module keyVaultModule 'public-keyvault.bicep' = {
+//   name: 'keyVaultDeploy'
+//   scope: resourceGroup()
+//   params: {
+//     location: location
+//     keyVaultName: keyVaultName
+//     clientIpAddress: clientIpAddress
+//     tags: tags
+//   }
+// }
+
+module storageModule 'public-storage.bicep' = {
   name: 'StorageDeploy'
   scope: resourceGroup()
   params: {
@@ -66,41 +79,56 @@ module storage 'public-storage.bicep' = {
   ]
 }
 
+// Add Foundry project
+// Add PostgreSQL
+// Add Cosmos DB
+
+
 // Reference existing Key Vault
 // resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
-//  name: namingModule.outputs.keyVaultName
-//  scope: resourceGroup(namingModule.outputs.resourceGroupPurviewName)
-//}
+//  name: keyVaultName
+//  scope: resourceGroup(namingModule.outputs.resourceGroupFabricName)
+// }
 
 // Use the secret in a parameter
-// var sqlAdministratorLogin = listSecrets(resourceId(namingModule.outputs.resourceGroupPurviewName, 'Microsoft.KeyVault/vaults/secrets', namingModule.outputs.keyVaultName, namingModule.outputs.synapseSqlAdministratorLoginSecretName), '2023-07-01').value
-// var sqlAdministratorPassword = listSecrets(resourceId(namingModule.outputs.resourceGroupPurviewName, 'Microsoft.KeyVault/vaults/secrets', namingModule.outputs.keyVaultName, namingModule.outputs.synapseSqlAdministratorPassSecretName), '2023-07-01').value
+// var sqlAdministratorLogin = listSecrets(resourceId(namingModule.outputs.resourceGroupFabricName, 'Microsoft.KeyVault/vaults/secrets', namingModule.outputs.keyVaultName, namingModule.outputs.postgreSqlAdministratorLoginSecretName), '2023-07-01').value
+// var sqlAdministratorPassword = listSecrets(resourceId(namingModule.outputs.resourceGroupFabricName, 'Microsoft.KeyVault/vaults/secrets', namingModule.outputs.keyVaultName, namingModule.outputs.postgreSqlAdministratorPassSecretName), '2023-07-01').value
 
-// var sqlAdministratorLogin string = keyVault.getSecret(namingModule.outputs.synapseSqlAdministratorLoginSecretName)
-// var sqlAdministratorPassword string = keyVault.getSecret(namingModule.outputs.synapseSqlAdministratorPassSecretName)
+// resource secretPassword 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+//   name: '${keyVaultName}/${namingModule.outputs.postgreSqlAdministratorPassSecretName}'
+//   properties: {
+//     value: sqlAdministratorPassword
+//   }
+// }
 
+// resource secretLogin 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+//   name: '${keyVaultName}/${namingModule.outputs.postgreSqlAdministratorLoginSecretName}'
+//   properties: {
+//     value: sqlAdministratorLogin
+//   }
+// }
 
-module synapse 'public-synapse-workspace.bicep' = {
-  name: 'SynapseDeploy'
+module postgresqlModule 'public-postgresql.bicep' = {
+  name: 'PostgreSQLDeploy'
   scope: resourceGroup()
   params: {
-    workspaceName: namingModule.outputs.synapseWorkspaceName
+    postgreSqlServerName: namingModule.outputs.postgreSqlServerName
     location: location
-    defaultStorageAccountName: namingModule.outputs.synapseStorageAccountName
-    defaultFileSystemName: namingModule.outputs.synapseFileSystemName
     sqlAdministratorLogin: sqlAdministratorLogin
     sqlAdministratorPassword: sqlAdministratorPassword
-    sqlPoolName: namingModule.outputs.synapseSqlPoolName
-    sqlPoolSku: namingModule.outputs.synapseSqlPoolSku
-    sparkPoolName: namingModule.outputs.synapseSparkPoolName
-    sparkPoolNodeSize: namingModule.outputs.synapseSparkPoolNodeSize
-    sparkPoolMinNodeCount: namingModule.outputs.synapseSparkPoolMinNodeCount
-    sparkPoolMaxNodeCount: namingModule.outputs.synapseSparkPoolMaxNodeCount
-    sparkPoolAutoScaleEnabled: namingModule.outputs.synapseSparkPoolAutoScaleEnabled
-    sparkPoolAutoPauseEnabled: namingModule.outputs.synapseSparkPoolAutoPauseEnabled
-    sparkPoolAutoPauseDelayInMinutes: namingModule.outputs.synapseSparkPoolAutoPauseDelayInMinutes
-    sparkVersion: namingModule.outputs.synapseSparkVersion
-    purviewPrincipalId: purviewPrincipalId
+    clientIpAddress: clientIpAddress
+    tags: tags
+  }
+  dependsOn: [
+  ]
+}
+
+module cosmosModule 'public-cosmosdb.bicep' = {
+  name: 'CosmosDBDeploy'
+  scope: resourceGroup()
+  params: {
+    cosmosDBName: namingModule.outputs.cosmosDBName
+    location: location
     objectId: objectId
     objectType: objectType
     clientIpAddress: clientIpAddress
@@ -110,18 +138,13 @@ module synapse 'public-synapse-workspace.bicep' = {
   ]
 }
 
-output outStorageAccountName string = storage.outputs.outStorageAccountName
-output outStorageFilesysName string = storage.outputs.outStorageFilesysName
-output synapseWorkspaceId string = synapse.outputs.synapseWorkspaceId
-output synapseWorkspaceName string = synapse.outputs.synapseWorkspaceName
-output synapseWorkspaceEndpoint string = synapse.outputs.synapseWorkspaceEndpoint
-output synapseSqlEndpoint string = synapse.outputs.synapseSqlEndpoint
-output synapseSqlOnDemandEndpoint string = synapse.outputs.synapseSqlOnDemandEndpoint
-output synapseSqlPoolId string = synapse.outputs.sqlPoolId
-output synapseSqlPoolName string = synapse.outputs.sqlPoolName
-output synapseSparkPoolId string = synapse.outputs.sparkPoolId
-output synapseSparkPoolName string = synapse.outputs.sparkPoolName
-output synapseStorageAccountId string = synapse.outputs.storageAccountId
-output synapseStorageAccountName string = synapse.outputs.storageAccountName
-output synapseDefaultFileSystemName string = synapse.outputs.defaultFileSystemName
-output synapseWorkspaceManagedIdentityPrincipalId string = synapse.outputs.workspaceManagedIdentityPrincipalId
+output outStorageAccountName string = storageModule.outputs.outStorageAccountName
+output outStorageFilesysName string = storageModule.outputs.outStorageFilesysName
+output postgresqlId string = postgresqlModule.outputs.postgresqlId
+output postgresqlName string = postgresqlModule.outputs.postgresqlName
+output postgresqlEndpoint string = postgresqlModule.outputs.postgresqlEndpoint
+output postgresqlAdminLogin string = postgresqlModule.outputs.postgresqlAdminLogin
+output postgresqlVersion string = postgresqlModule.outputs.postgresqlVersion
+output postgresqlStorageSizeGB int = postgresqlModule.outputs.postgresqlStorageSizeGB
+
+output cosmosDBName string = cosmosModule.outputs.cosmosDBName

@@ -243,7 +243,7 @@ Usually this step is not required in a pipeline as the connection with Azure is 
 
       type SparkVersion = '2.4' | '3.1' | '3.2' | '3.3' | '3.4'
       output synapseSparkVersion SparkVersion = '3.4'
-      output resourceGroupPurviewName string = 'fabric-myco-test'
+      output resourceGroupFabricName string = 'fabric-myco-test'
       output resourceGroupDatasourceName string = 'fabric-myco-test'
     ```
 

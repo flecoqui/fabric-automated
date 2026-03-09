@@ -4,6 +4,12 @@ param location string = resourceGroup().location
 @description('Name of the key vault resource.')
 param keyVaultName string
 
+@description('The user object Id of the user or service principal running the script.')
+param objectId string = ''
+
+@description('The  object type User or ServicePrincipal.')
+param objectType string = 'User'
+
 @description('The client IP address.')
 param clientIpAddress string = ''
 
@@ -36,6 +42,17 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
       virtualNetworkRules: []
     }
     publicNetworkAccess: 'enabled'
+  }
+}
+
+var roleKeyVaultSecretOfficer = 'b86a8fe4-44ce-4948-aee5-eccb2c155cd7'
+resource keyVaultRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(keyVault.id, objectId, roleKeyVaultSecretOfficer)
+  scope: keyVault
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleKeyVaultSecretOfficer)
+    principalId: objectId
+    principalType: objectType
   }
 }
 
