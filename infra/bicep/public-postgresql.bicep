@@ -38,7 +38,7 @@ param clientIpAddress string = ''
 @description('The tags to be applied to the provisioned resources.')
 param tags object
 
-
+#disable-next-line BCP081
 resource postgresql 'Microsoft.DBforPostgreSQL/flexibleServers@2026-01-01-preview' = {
   name: postgreSqlServerName
   location: location

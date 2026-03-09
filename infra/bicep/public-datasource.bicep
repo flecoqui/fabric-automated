@@ -130,7 +130,7 @@ module cosmosModule 'public-cosmosdb.bicep' = {
     cosmosDBName: namingModule.outputs.cosmosDBName
     location: location
     objectId: objectId
-    objectType: objectType
+    fabricPrincipalId: fabricPrincipalId
     clientIpAddress: clientIpAddress
     tags: tags
   }

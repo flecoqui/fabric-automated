@@ -11,9 +11,6 @@ param fabricPrincipalId string = ''
 @description('The user object Id of the user or service principal running the script.')
 param objectId string = ''
 
-@description('The  object type User or ServicePrincipal.')
-param objectType string = 'User'
-
 @description('The client IP address.')
 param clientIpAddress string = ''
 
