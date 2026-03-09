@@ -5,6 +5,9 @@ param cosmosDBName string
 @description('Location for all resources')
 param location string = resourceGroup().location
 
+@description('The Fabric account principal ID.')
+param fabricPrincipalId string = ''
+
 @description('The user object Id of the user or service principal running the script.')
 param objectId string = ''
 
@@ -57,6 +60,17 @@ resource cosmosDBDataContributorRoleAssignment 'Microsoft.DocumentDB/databaseAcc
     scope: cosmos.id
   }
 }
+
+resource cosmosDBDataContributorRoleAssignmentFabric 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2021-11-15-preview' = {
+  name: guid(cosmos.id, fabricPrincipalId, roleCosmosDBDataContributor)
+  parent: cosmos
+  properties: {
+    roleDefinitionId: '${cosmos.id}/sqlRoleDefinitions/${roleCosmosDBDataContributor}'
+    principalId: fabricPrincipalId
+    scope: cosmos.id
+  }
+}
+
 
 // Outputs
 output cosmosDBId string = cosmos.id

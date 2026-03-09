@@ -8,7 +8,7 @@ param storageAccountName string
 param defaultContainerName string
 
 @description('The Fabric account principal ID.')
-param purviewPrincipalId string = ''
+param fabricPrincipalId string = ''
 
 @description('The user object Id of the user or service principal running the script.')
 param objectId string = ''
@@ -65,21 +65,21 @@ resource storageFileSystem 'Microsoft.Storage/storageAccounts/blobServices/conta
 }
 
 resource storageBlobRoleAssignment1 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storageAccount.id, purviewPrincipalId, roleStorageBlobDataReader)
+  name: guid(storageAccount.id, fabricPrincipalId, roleStorageBlobDataReader)
   scope: storageAccount
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleStorageBlobDataReader)
-    principalId: purviewPrincipalId
+    principalId: fabricPrincipalId
     principalType: 'ServicePrincipal'
   }
 }
 
 resource storageFileRoleAssignment1 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storageAccount.id, purviewPrincipalId, roleStorageFileReader)
+  name: guid(storageAccount.id, fabricPrincipalId, roleStorageFileReader)
   scope: storageAccount
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleStorageFileReader)
-    principalId: purviewPrincipalId
+    principalId: fabricPrincipalId
     principalType: 'ServicePrincipal'
   }
 }

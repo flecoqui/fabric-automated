@@ -1838,7 +1838,7 @@ if [ "${ACTION}" = "deploy-public-datasource" ] ; then
     suffix=${AZURE_SUFFIX} \
     sqlAdministratorLogin=\"${POSTGRESQL_ADMIN_LOGIN}\" \
     sqlAdministratorPassword=\"${POSTGRESQL_ADMIN_PASSWORD}\" \
-    purviewPrincipalId=\"${AZURE_FABRIC_WORKSPACE_IDENTITY}\" \
+    fabricPrincipalId=\"${AZURE_FABRIC_WORKSPACE_IDENTITY}\" \
     objectId=\"${OBJECT_ID}\"  objectType=\"${OBJECT_TYPE}\"  \
     clientIpAddress=\"${CLIENT_IP_ADDRESS}\" --mode Incremental --verbose"
     printProgress "$cmd"

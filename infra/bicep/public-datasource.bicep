@@ -21,7 +21,7 @@ param sqlAdministratorLogin string
 param sqlAdministratorPassword string
 
 @description('The Fabric account principal ID.')
-param purviewPrincipalId string = ''
+param fabricPrincipalId string = ''
 
 @description('The user object Id of the user or service principal running the script.')
 param objectId string = ''
@@ -69,7 +69,7 @@ module storageModule 'public-storage.bicep' = {
     location: location
     storageAccountName: namingModule.outputs.storageAccountName
     defaultContainerName: namingModule.outputs.storageAccountDefaultContainerName
-    purviewPrincipalId: purviewPrincipalId
+    fabricPrincipalId: fabricPrincipalId
     objectId: objectId
     objectType: objectType
     clientIpAddress: clientIpAddress
