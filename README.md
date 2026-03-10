@@ -1,207 +1,355 @@
-
-# Fabric Automated
+# Deploying Microsoft Fabric with data sources
 
 ## Introduction
-This document contains the main findings of a Microsoft Fabric assessment.
-Especially, how to use Microsoft Fabric to support the following scenarios:
 
-**Scanning:** A recurring scan will be configured in Microsoft Fabric to scan the entire stage-data container.
+This document describe how to deploy Microsoft Fabric and sample data sources (Azure Storage Account, CosmosDB, PostgreSQL).
 
-**Classification:** Custom classification rules will be created to automatically identify and tag PII .
+Once the infrastructure is deployed, you can evaluate Microsoft Fabric running different scenarios:
+- Creating Copy Data pipeline to DataLake
+- Creating Copy Data pipeline to a KQL DataLake
 
-**Lineage:** Fabric will automatically map the end-to-end lineage, visually tracking data as it flows.
+Moreover, as it's an evaluation of the Fabric infrastructure, it supports both configurations:
+- One configuration with public endpoints to reach Fabric and data sources.
 
-After a brief description of Microsoft Fabric description, this document will describe how to deploy Microsoft Fabric in one single Microsoft Entra ID tenant whether the Fabric account is accessible through public endpoints or through a private endpoints.
-Moreover, it will describe how to scan the datasources accessible through:
-- a private endpoint using a virtual machine or a machine running a self hosted Integration Runtime or
-- a public endpoint using the Azure Integration Runtime.
+![Public Infrastructure](./diagrams/public-fabric.png)
 
-How to deploy a public Fabric infrastructure or a private Fabric infrastructure: [here](./infra/deploy-infra.md)
+- One configuration with private endpoints to reach Fabric and data sources.
 
-At least, it will describe how to create custom Lineage using either:
-- a Python source code running in VSCode terminal,
-- a notebook running in Synapse Workspace 
-- a job running in Synapse Workspace
-  
-How to deploy custom lineage: [here](./infra/deploy-lineage.md)
+![Private Infrastructure](./diagrams/private-fabric.png)
 
 
-## Microsoft Fabric (formerly Azure Fabric)
-### Overview
-Microsoft Fabric is a **unified data governance, security, and compliance platform** that helps organizations **govern, protect, and manage data across on-premises, multicloud, and SaaS environments**. It addresses challenges such as data fragmentation, lack of visibility, and compliance risks by providing an integrated set of solutions.
+## Getting Started
 
----
+In this repository, you'll find scripts and bicep files to deploy a Fabric Infrastructure. This infrastructure will be deployed in the cloud (Azure)<>
 
-### Key Capabilities
+This chapter describes how to :
 
-#### 1. **Data Governance**
-- **Microsoft Fabric Data Map**
-  - Scans and registers data sources to create a **map of your entire data estate**.
-  - Provides **data classification** and **end-to-end lineage**.
-- **Microsoft Fabric Unified Catalog**
-  - Curates and manages data sources.
-  - Ensures **data integrity**, **security**, and **business value extraction**.
+1. Install the pre-requisites including Visual Studio Code, Dev Container
+2. Create, deploy the infrastructure
 
-**Supported Sources:**
-Azure Storage, Power BI, SQL databases, Hive, Amazon S3, and more.
+This repository contains the following resources :
 
----
+- A Dev container under '.devcontainer' folder
+- The Azure configuration for a deployment under '.config' folder
+- The scripts, bicep files and dataset files used to deploy the infrastructure under: ./infra
 
-#### 2. **Data Security**
-- **Data Loss Prevention (DLP)**
-  Protects sensitive data from accidental or malicious leaks.
-- **Information Protection**
-  Classifies and labels sensitive data.
-- **Insider Risk Management**
-  Detects and mitigates insider threats.
-- **Privileged Access Management**
-  Controls and monitors privileged accounts.
-- **Data Security Posture Management**
-  Assesses and improves security configurations.
+### Installing the pre-requisites
 
----
+In order to test the solution, you need first an Azure Subscription, you can get further information about Azure Subscription [here](https://azure.microsoft.com/en-us/free).
 
-#### 3. **Risk & Compliance**
-- **Microsoft Fabric Audit**
-  Tracks user and admin activities for compliance.
-- **Communication Compliance**
-  Monitors communications for policy violations.
-- **Compliance Manager**
-  Provides compliance score and actionable insights.
-- **eDiscovery**
-  Facilitates legal investigations and data retrieval.
-- **Data Lifecycle Management**
-  Automates retention and deletion policies.
+You also need to install Git client and Visual Studio Code on your machine, below the links.
 
----
+|[![Windows](./infra/windows_logo.png)](https://git-scm.com/download/win) |[![Linux](./infra/linux_logo.png)](https://git-scm.com/download/linux)|[![MacOS](./infra/macos_logo.png)](https://git-scm.com/download/mac)|
+|:---|:---|:---|
+| [Git Client for Windows](https://git-scm.com/download/win) | [Git client for Linux](https://git-scm.com/download/linux)| [Git Client for MacOs](https://git-scm.com/download/mac) |
+[Visual Studio Code for Windows](https://code.visualstudio.com/Download)  | [Visual Studio Code for Linux](https://code.visualstudio.com/Download)  &nbsp;| [Visual Studio Code for MacOS](https://code.visualstudio.com/Download) &nbsp; &nbsp;|
 
-### Benefits
-- **Unified Platform**: Combines governance, security, and compliance in one portal.
-- **Visibility & Control**: End-to-end view of your data estate.
-- **Regulatory Compliance**: Helps meet GDPR, HIPAA, and other standards.
-- **Scalability**: Works across hybrid and multi-cloud environments.
+Once the Git client is installed you can clone the repository on your machine running the following commands:
 
----
+1. Create a Git directory on your machine
 
-### Access & Management
-The **Microsoft Fabric Portal** offers:
-- A **streamlined interface** for managing governance, security, and compliance.
-- Quickstart guides and step-by-step setup for easy onboarding.
+    ```bash
+        c:\> mkdir git
+        c:\> cd git
+        c:\git>
+    ```
 
----
+2. Clone the repository.
+    For instance:
 
-#### Learn More
-[Microsoft Fabric Documentation](https://learn.microsoft.com/en-us/fabric/fabric)
+    ```bash
+        c:\git> git clone  https://github.com/flecoqui/fabric-automated.git
+        c:\git> cd ./fabric-automated
+        c:\git\fabric-automated>
+    ```
 
-[Microsoft Fabric Create Datasource API](https://learn.microsoft.com/en-us/rest/api/fabric/scanningdataplane/data-sources/create-or-replace?view=rest-fabric-scanningdataplane-2023-09-01&tabs=HTTP)
+### Using Dev Container
 
-[Microsoft Fabric Create Classification Rules API](https://learn.microsoft.com/en-us/rest/api/fabric/scanningdataplane/classification-rules/create-or-replace?view=rest-fabric-scanningdataplane-2023-09-01&tabs=HTTP)
+#### Installing Dev Container pre-requisites
 
-[Microsoft Fabric Create Scan Rulesets API](https://learn.microsoft.com/en-us/rest/api/fabric/scanningdataplane/scan-rulesets/create-or-replace?view=rest-fabric-scanningdataplane-2023-09-01&tabs=HTTP)
+You need to install the following pre-requisite on your machine
 
-[Microsoft Fabric Create Scans API](https://learn.microsoft.com/en-us/rest/api/fabric/scanningdataplane/scans/create-or-replace?view=rest-fabric-scanningdataplane-2023-09-01&tabs=HTTP)
+1. Install and configure [Docker](https://www.docker.com/get-started) for your operating system.
 
-## Deploying Microsoft Fabric
+   - Windows / macOS:
 
-Microsoft Fabric Account can be deployed in Azure using either public endpoints or private endpoints.
-This chapter describes both architecture with public endpoints and private endpoints
+     1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop) for Windows/Mac.
 
-Further information [here](https://learn.microsoft.com/en-us/fabric/legacy/concept-best-practices-network)
+     2. Right-click on the Docker task bar item, select Settings / Preferences and update Resources > File Sharing with any locations your source code is kept. See [tips and tricks](https://code.visualstudio.com/docs/remote/troubleshooting#_container-tips) for troubleshooting.
 
-### Deploying Fabric using public endpoints
+     3. If you are using WSL 2 on Windows, to enable the [Windows WSL 2 back-end](https://docs.docker.com/docker-for-windows/wsl/): Right-click on the Docker taskbar item and select Settings. Check Use the WSL 2 based engine and verify your distribution is enabled under Resources > WSL Integration.
 
-By default, you can use Microsoft Fabric accounts through the public endpoints accessible over the internet. Allow public networks in your Microsoft Fabric account if you have the following requirements:
+   - Linux:
 
-- No private connectivity is required when scanning or connecting to Microsoft Fabric endpoints.
-- All data sources are software-as-a-service (SaaS) applications only.
-- All data sources have a public endpoint that's accessible through the internet.
-- Business users require access to a Microsoft Fabric account and the Microsoft Fabric governance portal through the internet.
+     1. Follow the official install [instructions for Docker CE/EE for your distribution](https://docs.docker.com/get-docker/). If you are using Docker Compose, follow the [Docker Compose directions](https://docs.docker.com/compose/install/) as well.
 
-With this architecture you can use all the integration runtime types:
-- the Azure integration runtime,
-- Managed VNet integration runtime, and
-- a self-hosted integration runtime
+     2. Add your user to the docker group by using a terminal to run: 'sudo usermod -aG docker $USER'
 
-Whenever applicable, we recommend that you use the Azure integration runtime or Managed VNet integration runtime to scan data sources, to reduce cost and administrative overhead. A virtual machine runing Self Hosted Integration Runtime will be required if the Azure Storage Account is accessible through Azure Storage Account keys stored in the Azure Key Vault. If the Azure Storage Account is accessible using Role Based Access Control (RBAC), the Azure Integration Runtime will be sufficient for Storage Accounts with public access, the Managed VNET Integration Runtime will be required for Storage Accounts connected to a Virtual Network.
+     3. Sign out and back in again so your changes take effect.
 
-Below the diagram to scan data source with public network access using Azure Integration Runtime (Data Lake, Synapse):
+2. Ensure [Visual Studio Code](https://code.visualstudio.com/) is already installed.
 
-![private fabric](diagrams/public_purview_synapse.png)
+3. Install the [Remote Development extension pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack)
 
-Below the diagram to scan data source with public network access using Azure Integration Runtime (Azure Storage):
+#### Using Visual Studio Code and Dev Container
 
-![public fabric](diagrams/public_purview.png)
+1. Launch Visual Studio Code in the folder where you cloned the 'ps-data-foundation-imv' repository
 
-Scanning on-premises and VM-based data sources always requires using a self-hosted integration runtime. The diagram below shows
-- a scenario where resources are within Azure or on a VM in Azure and
-- another scenario with on-premises resources
+    ```bash
+        c:\git\dataops> code .
+    ```
 
-![public fabric and shir](diagrams/public_purview_shir.png)
+2. Once Visual Studio Code is launched, you should see the following dialog box:
 
-### Deploying Fabric using private endpoints
+    ![Visual Studio Code](./infra/reopen-in-container.png)
 
-You can deploy Fabric using private endpoints that can be enabled on your virtual network. You can then disable public internet access to securely connect to Microsoft Fabric.
+3. Click on the button 'Reopen in Container'
+4. Visual Studio Code opens the Dev Container. If it's the first time you open the project in container mode, it first builds the container, it can take several minutes to build the new container.
+5. Once the container is loaded, you can open a new terminal (Terminal -> New Terminal).
+6. And from the terminal, you have access to the tools installed in the Dev Container like az client,....
 
-You must use private endpoints for your Microsoft Fabric account if you have any of the following requirements:
-- You need to have end-to-end network isolation for Microsoft Fabric accounts and data sources.
-- You need to block public access to your Microsoft Fabric accounts.
-- Your platform-as-a-service (PaaS) data sources are deployed with private endpoints, and you've blocked all access through the public endpoint.
-- Your on-premises or infrastructure-as-a-service (IaaS) data sources can't reach public endpoints.
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ az login
+    ```
+
+### How to deploy infrastructure from the Dev Container terminal
+
+The Dev Container is now running, you can use the bash file [./infra/deploy-infra.sh ](./infra/infra/deploy-infra.sh ) to:
+
+- deploy the infrastructure 
+- create data copy pipeline
+
+Below the list of arguments associated with 'deploy-infra.sh ':
+
+- -a  Sets action {azure-login, deploy-public-fabric, deploy-public-datasource, remove-public-fabric, remove-public-datasource, deploy-private-fabric, deploy-private-datasource, remove-private-fabric, remove-private-datasource,}
+- -c  Sets the configuration file
+- -e  Sets environment dev, staging, test, preprod, prod
+- -t  Sets deployment Azure Tenant Id
+- -s  Sets deployment Azure Subscription Id
+- -r  Sets the Azure Region for the deployment
+
+#### Connection to Azure
+
+Follow the steps below to establish with your Azure Subscription where you want to deploy your infrastructure.
+
+1. Launch the Azure login process using 'deploy-infra.sh -a azure-login'.
+Usually this step is not required in a pipeline as the connection with Azure is already established.
+
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a azure-login
+    ```
+
+    After this step the default Azure subscription has been selected. You can still change the Azure subscription, using Azure CLI command below:
+
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ az account set --subscription <azure-subscription-id>
+    ```
+    Using the command below you can define the Azure region, subscription, the tenant and the environment where Fabric will be deployed.
+
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh -a azure-login -r <azure_region> -e dev -s <subscription_id> -t <tenant_id>
+    ```
+
+    After this step, the variables AZURE_REGION, AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID and AZURE_ENVIRONMENT used for the deployment are stored in the file ./.config/.default.env.
+    The variable AZURE_DEFAULT_FABRIC_RESOURCE_GROUP and AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP are by default empty string.
+    By default the name of the Fabric resource group will be 'rgpurview[AZURE_ENVIRONMENT][visibility][AZURE_SUFFIX]'
+    the name of the Datasource resource group will be 'rgdatasource[AZURE_ENVIRONMENT][visibility][AZURE_SUFFIX]'
+    where [visibility] value is 'pri' for private deployment and 'pub' for public deployment.
+
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ cat ./.config/.default.env
+        AZURE_REGION=westus3
+        AZURE_SUFFIX=to-be-updated (4 digits)
+        AZURE_SUBSCRIPTION_ID=to-be-updated
+        AZURE_TENANT_ID=to-be-updated
+        AZURE_ENVIRONMENT=dev
+        AZURE_DEFAULT_FABRIC_RESOURCE_GROUP=""
+        AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP=""
+    ```
+
+    In order to deploy the infrastructure with the script 'deploy-infra.sh ', you need to be connected to Azure with sufficient privileges to assign roles to Azure Key Vault and Azure Storage Accounts.
+    Instead of using an interactive authentication session with Azure using your Azure account, you can use a service principal connection.
+
+    If you don't have enough permission to create the resource groups for this deployment and you must reuse existing resource groups, you can set the values AZURE_DEFAULT_FABRIC_RESOURCE_GROUP, AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP in file ./.config/.default.env.
+
+    For instance:
+
+    ```bash
+        AZURE_DEFAULT_FABRIC_RESOURCE_GROUP="fabric-test-rg"
+        AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP="fabric-test-rg"
+    ```
+
+    If you don't have enough permission to deploy some resources in your subscription and you must reuse existing resources like Microsoft Fabric, Synapse Analytics Workspace, you can change the file [naming-convention.bicep](./bicep/naming-convention.bicep) to set the name of some resources.
+
+    For instance:
+    ```bash
+        @description('The Azure Environment (dev, staging, preprod, prod,...)')
+        @maxLength(13)
+        param environment string = uniqueString(resourceGroup().id)
+
+        @description('The cloud visibility (pub, pri)')
+        @maxLength(7)
+        param visibility string = 'pub'
+
+        @description('The Azure suffix')
+        @maxLength(4)
+        param suffix string = '0000'
+
+
+        var baseName = toLower('${environment}${visibility}${suffix}')
+
+        output fabricAccountName string = 'fabric${baseName}'
+        output fabricWorkspaceName string = 'workspace${baseName}'
+        output vnetName string = 'vnet${baseName}'
+        output storageAccountName string = 'st${baseName}'
+        output storageAccountDefaultContainerName string = 'test${baseName}'
+        output keyVaultName string = 'kv${baseName}'
+        output privateEndpointSubnetName string = 'snet${baseName}pe'
+        output datagwSubnetName string = 'snet${baseName}dtgw'
+        output datagwVMSSName string = 'vm${baseName}'
+        output datagwLoadBalancerName string = 'lbvm${baseName}'
+        output vpnGatewayName string = 'vnetvpngateway${baseName}'
+        output vpnGatewayPublicIpName string = 'vnetvpngatewaypip${baseName}'
+        output dnsResolverName string = 'vnetdnsresolver${baseName}'
+        output bastionSubnetName string = 'AzureBastionSubnet'
+        output bastionHostName string = 'bastion${baseName}'
+        output bastionPublicIpName string = 'bastionpip${baseName}'
+        output gatewaySubnetName string = 'GatewaySubnet'
+        output dnsDelegationSubNetName string = 'DNSDelegationSubnet'
+        output baseName string = baseName
+        output postgreSqlServerName string = 'postgre${baseName}'
+        output postgreSqlAdministratorLoginSecretName string = 'POSTGRE-SQL-LOGIN'
+        output postgreSqlAdministratorPassSecretName string = 'POSTGRE-SQL-PASSWORD'
+        type SqlSku = 'Standard_D2ds_v4' | 'Standard_D4ds_v4' 
+        output postgreSqlSku SqlSku = 'Standard_D2ds_v4'
+        type sqlVersion = '11' | '12' | '13' | '14' | '15' | '16' | '17' | '18'
+        output postgreSqlVersion sqlVersion = '13'
+        output cosmosDBName string = 'cosmos${baseName}'
+        output resourceGroupFabricName string = 'rgfabric${baseName}'
+        output resourceGroupDatasourceName string = 'rgdatasource${baseName}'
+    ```
 
+#### Deploying Fabric and Data Source with public endpoint
 
-Below the diagram of the Microsoft Fabric architecture using a VNET integration for Fabric and data sources (Data Lake, Synapse):
+1. Once you are connected to your Azure subscription, you can now deploy a Fabric infrastructure associated with public endpoints.
 
-![private fabric](diagrams/private_purview_synapse.png)
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-public-fabric
+    ```
 
-Below the diagram of the Microsoft Fabric architecture using a VNET integration for Fabric and data sources (Storage Accounts):
+    After this step, the variables AZURE_SUFFIX and PURVIEW_PRINCIPAL_ID used for the deployment are stored in the file ./.config/.default.env.
+    AZURE_SUFFIX is used to name the Azure resource. For a public endpoint deployement with suffix will be "${AZURE_ENVIRONMENT}pub${AZURE_SUFFIX}", and "${AZURE_ENVIRONMENT}pri${AZURE_SUFFIX}" for a deployment with private endpoints
+    PURVIEW_PRINCIPAL_ID is the principal id of the managed identity associated with the Fabric account.
 
-![private fabric](diagrams/private_purview.png)
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ cat ./.config/.default.env
+        AZURE_REGION=westus3
+        AZURE_SUBSCRIPTION_ID=to-be-completed
+        AZURE_TENANT_ID=to-be-completed
+        AZURE_ENVIRONMENT=dev
+        AZURE_SUFFIX=3033
+        PURVIEW_PRINCIPAL_ID=to-be-completed
+    ```
 
+    AZURE_REGION defines the Azure region where you want to install your infrastructure, it's 'westus3' by default.
+    AZURE_SUFFIX defines the suffix which is used to name the Azure resources. By default this suffix includes 4 random digits which are used to avoid naming conflict when a resource with the same name has already been deployed in another subscription.
+    AZURE_SUBSCRIPTION_ID is the Azure Subscription Id where you want to install your infrastructure
+    AZURE_TENANT_ID is the Azure Tenant Id used for the authentication.
+    AZURE_ENVIRONMENT defines the environment 'dev', 'stag', 'prod',...
 
-Whenever applicable, for private architecture, we recommend that you use the Managed VNet integration runtime to scan data sources, to reduce cost and administrative overhead. A virtual machine running Self Hosted Integration Runtime will be required if the Azure Storage Account is accessible through Azure Storage Account keys stored in the Azure Key Vault. If the Azure Storage Account is accessible using Role Based Access Control (RBAC), the Managed VNET Integration Runtime will be required for Storage Accounts connected to a Virtual Network.
 
-Below the diagram to scan data source using either Managed VNET Integration Runtime or a virtual machine running Self-Hosted Integration Runtime:
+2. Once Fabric is deployed into your Azure subscription, you can now deploy a datasources (Azure Storage Account ADLS gen2, Synapse Workspace, Synapse Azure Storage Account ADLS gen2, PostgreSQL pool) associated with public endpoints. This datasource will be accessible for the Fabric account.
 
-![private fabric and shir](diagrams/private_purview_shir.png)
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-public-datasource
+    ```
+    After this step, dataset files are copied in the container 'test01' in the new storage.
 
-Below the diagram to scan data source using a virtual machine running Self-Hosted Integration Runtime in another VNET connected to Fabric VNET using VNET peering:
 
-![private fabric and shir](diagrams/private_purview_shir_vnet_peering.png)
+3. From this stage, you can open the Fabric portal (https://app.fabric.microsoft.com/) to check whether the Workspace has been created with the following name format: workspace{env}{visibility}{suffix}
 
-## Which approach for the project ?
+6. When your test are over, you can remove the infrastructure running the following commands:
 
-### How many Microsoft Fabric Accounts in tenant?
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a remove-public-fabric
+        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a remove-public-datasource
+    ```
 
-Currently in some Tenants, it seems possible to deploy more than one Fabric account. If you need to deploy Microsoft Fabric in a new  Microsoft Entra ID Tenant, you could only deploy a single instance of Microsoft Fabric per tenant.
 
-### Organizing the Fabric Collections
+#### Deploying Fabric and Data Source with private endpoints
 
-As for the project, we need to deploy data sources in different environments like dev, staging, production. Before launching the data classification, scan or lineage, it's recommended to create Fabric Collections which will be associated with different data sources.
+1. Once you are connected to your Azure subscription, you can now deploy a Fabric infrastructure associated with private endpoints.
 
-For instance under the root collection associated with the Microsoft Fabric Account, we could create a 'PurviewAutomated' collection, and then create a collection for each environment under 'PurviewAutomated'.
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-private-fabric
+    ```
 
-![Collections](diagrams/collection_main.png)
+    After this step, the variables AZURE_SUFFIX and PURVIEW_PRINCIPAL_ID used for the deployment are stored in the file ./.config/.default.env.
+    AZURE_SUFFIX is used to name the Azure resource. For a private endpoint deployement with suffix will be "${AZURE_ENVIRONMENT}pub${AZURE_SUFFIX}", and "${AZURE_ENVIRONMENT}pri${AZURE_SUFFIX}" for a deployment with private endpoints
+    PURVIEW_PRINCIPAL_ID is the principal id of the managed identity associated with the Fabric account.
 
-![Collections Tree](diagrams/collection_tree.png)
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ cat ./.config/.default.env
+        AZURE_REGION=westus3
+        AZURE_SUBSCRIPTION_ID=to-be-completed
+        AZURE_TENANT_ID=to-be-completed
+        AZURE_ENVIRONMENT=dev
+        AZURE_SUFFIX=3033
+        PURVIEW_PRINCIPAL_ID=to-be-completed
+    ```
 
-### What’s the network access control on your data source?
+    AZURE_REGION defines the Azure region where you want to install your infrastructure, it's 'westus3' by default.
+    AZURE_SUFFIX defines the suffix which is used to name the Azure resources. By default this suffix includes 4 random digits which are used to avoid naming conflict when a resource with the same name has already been deployed in another subscription.
+    AZURE_SUBSCRIPTION_ID is the Azure Subscription Id where you want to install your infrastructure
+    AZURE_TENANT_ID is the Azure Tenant Id used for the authentication.
+    AZURE_ENVIRONMENT defines the environment 'dev', 'stag', 'prod',...
 
-The following table lists some common firewall options. You can choose the supported IR type according to your scenario.
 
-| Data source firewall | Azure IR | Managed Virtual Network IR| SHIR | Kubernetes supported SHIR |
-| :----- | :----- | :----- | :----- | :----- |
-| Allow public access | ✓ | ✓ | ✓ | ✓ |
-| Allow Azure service or trusted service | ✓ | ✓ | ✓ | ✓ |
-| Allow access from specific Azure virtual network | | ✓ (with managed private endpoint support) | ✓ |  |
-| Allow specific IP / IP range |  |  | ✓ | ✓ |
-| Other on-premises or private network access | | | ✓ | ✓ |
+2. Once Fabric is deployed into your Azure subscription, as all the new resources are connected to a virtual network with public access disabled, you need to establish a VPN connection to this virtual network before deploying data sources or Integration Runtimes.
 
-### What’s the firewall setting of your Microsoft Fabric?
-Microsoft Fabric provides different network firewall options. You can choose the supported IR type according to your scenario.
+3. As the Virtual Network is fully isolated, the VPN Gateway has been installed connected to the Virtual Network. You can now test this VPN Gateway.
 
-| Fabric firewall | Azure IR | Managed Virtual Network IR| SHIR | Kubernetes supported SHIR |
-| :----- | :----- | :----- | :----- | :----- |
-| Enabled from all networks | ✓ | ✓ | ✓ | ✓ |
-| Disabled from all networks |   | ✓ (managed private endpoint required) | ✓ (need to create private endpoint from your network) | ✓ (need to create private endpoint from your network) |
+4. Install Azure VPN Client on your machine. Windows version available [here](https://apps.microsoft.com/detail/9np355qt2sqb?hl=en-US&gl=US)
 
+5. Open the [Azure portal](https://portal.azure.com), under the private Fabric resource group find the `virtual network gateway` resource.
 
+6. Open it, navigate to `Settings`, `Point-to-site configuration` and select `Download VPN client`.
+
+7. Unzip the zip file on your machine.
+
+8. Launch the Azure VPN Client and import the file: `azurevpnconfig.xml` file in `AzureVPN` folder into the Azure VPN Client.
+
+9. Click on the 'Connect' button, you'll need to enter your tenant credentials to establish a connection with the virtual machine.
+
+10. Once you are connected you can open the Fabric portal url https://web.fabric.azure.com/, and check all the menus are accessible without any errors. From this stage, if necessary you can deploy either
+ - Managed VNET Integration Runtime to scan data sources connected to a VNET and using Role Based Access Control
+ - Self Hosted Integration Runtime to scan data sources using a Storage Account Key stored in the Key Vault or to scan data sources on premises
+
+##### Deploying a data source (Azure Storage Account ADLS gen2 connected to a virtual network)
+
+1. Once Fabric is deployed into your Azure subscription, you have access to the resources through the VPN connection, you can now deploy a datasource (Azure Storage Account ADLS gen2) associated with private endpoints. This datasource will be accessible for the Fabric account.
+
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-private-datasource
+    ```
+    After this step, dataset files are copied in the container 'test01' in the new storage.
+
+
+##### Deploying Fabric Data Gateway
+
+1. If your data source is connected to a VNET through private endpoint and accessible using Storage Account Key, you can deploy a Fabric Data Gateway to establish a connection with your data sources running the following commands:
+
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-private-datagw
+    ```
+2. This command will deploy the Fabric Data Gateway in Microsoft Fabric portal, deploy a virtual machine connected to the VNET. The Self Hosted Integration Runtime will be in 'Running' state after 15 minutes. After this stage, the infrastructure is ready to scan storage accounts connected to the same virtual network. The Azure Storage Acount Key will be stored in the Azure Key Vault in a specific secret which will be used by the virtual machine running the Fabric Data Gateway.
+
+
+##### Removing the resources
+
+1. When your tests are over, you can remove the infrastructure running the following commands:
+
+    ```bash
+        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a remove-private-fabric
+        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a remove-private-datasource
+    ```
