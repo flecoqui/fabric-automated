@@ -34,7 +34,7 @@ param sqlAdministratorLogin string
 param sqlAdministratorPassword string
 
 @description('The Fabric account principal ID.')
-param purviewPrincipalId string = ''
+param fabricPrincipalId string = ''
 
 @description('The user object Id of the user or service principal running the script.')
 param objectId string = ''
@@ -74,6 +74,8 @@ var calcDnsZoneSubscriptionId = (newOrExistingDnsZones == 'new') ? subscription(
 // Getting the Ids for existing or newly created Private DNS Zones
 var dfsPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.dfs.${environment().suffixes.storage}')
 var blobPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.blob.${environment().suffixes.storage}')
+var postgresqlPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.postgres.database.azure.com')
+var cosmosdbPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.documents.azure.com')
 ///subscriptions/4b6e25b6-6b90-497a-9aa7-e673e32bc08c/resourceGroups/rgprivatepurview/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net
 //var dfsPrivateDnsZoneId = resourceId('4b6e25b6-6b90-497a-9aa7-e673e32bc08c', 'rgprivatepurview', 'Microsoft.Network/privateDnsZones', 'privatelink.blob.core.windows.net')
 
@@ -84,7 +86,7 @@ var blobPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneReso
 
 
 
-module storage 'private-storage.bicep' = {
+module storageModule 'private-storage.bicep' = {
   name: 'StorageDeploy'
   scope: resourceGroup()
   params: {
@@ -97,7 +99,7 @@ module storage 'private-storage.bicep' = {
     vnetResourceGroupName: dnsZoneResourceGroupName
     dfsPrivateDnsZoneId: dfsPrivateDnsZoneId
     blobPrivateDnsZoneId: blobPrivateDnsZoneId
-    purviewPrincipalId: purviewPrincipalId
+    fabricPrincipalId: fabricPrincipalId
     objectId: objectId
     objectType: objectType
     clientIpAddress: clientIpAddress
@@ -105,42 +107,48 @@ module storage 'private-storage.bicep' = {
   }
 }
 
-module synapse 'private-postgresql.bicep' = {
-  name: 'SynapseDeploy'
+module postgreSQLModule 'private-postgresql.bicep' = {
+  name: 'PostgreSQLDeploy'
   scope: resourceGroup()
   params: {
-    workspaceName: namingModule.outputs.synapseWorkspaceName
-    location: location
+    postgreSqlServerName: namingModule.outputs.postgreSqlServerName
     baseName: namingModule.outputs.baseName
-    defaultStorageAccountName: namingModule.outputs.synapseStorageAccountName
-    defaultFileSystemName: namingModule.outputs.synapseFileSystemName
+    location: location
     sqlAdministratorLogin: sqlAdministratorLogin
     sqlAdministratorPassword: sqlAdministratorPassword
-    sqlPoolName: namingModule.outputs.synapseSqlPoolName
-    sqlPoolSku: namingModule.outputs.synapseSqlPoolSku
-    sparkPoolName: namingModule.outputs.synapseSparkPoolName
-    sparkPoolNodeSize: namingModule.outputs.synapseSparkPoolNodeSize
-    sparkPoolMinNodeCount: namingModule.outputs.synapseSparkPoolMinNodeCount
-    sparkPoolMaxNodeCount: namingModule.outputs.synapseSparkPoolMaxNodeCount
-    sparkPoolAutoScaleEnabled: namingModule.outputs.synapseSparkPoolAutoScaleEnabled
-    sparkPoolAutoPauseEnabled: namingModule.outputs.synapseSparkPoolAutoPauseEnabled
-    sparkPoolAutoPauseDelayInMinutes: namingModule.outputs.synapseSparkPoolAutoPauseDelayInMinutes
-    sparkVersion: namingModule.outputs.synapseSparkVersion
-
+    tags: tags
     vnetName: vnetName
     subnetName: privateEndpointSubnetName
     vnetResourceGroupName: dnsZoneResourceGroupName
-    dfsPrivateDnsZoneId: dfsPrivateDnsZoneId
-    blobPrivateDnsZoneId: blobPrivateDnsZoneId
-    purviewPrincipalId: purviewPrincipalId
+    postgresDnsZoneId: postgresqlPrivateDnsZoneId
+  }
+  dependsOn: [
+  ]
+}
+
+
+module cosmosModule 'private-cosmosdb.bicep' = {
+  name: 'CosmosDBDeploy'
+  scope: resourceGroup()
+  params: {
+    cosmosDBName: namingModule.outputs.cosmosDBName
+    baseName: namingModule.outputs.baseName
+    location: location
     objectId: objectId
-    objectType: objectType
-    clientIpAddress: clientIpAddress
+    fabricPrincipalId: fabricPrincipalId
+    vnetName: vnetName
+    subnetName: privateEndpointSubnetName
+    vnetResourceGroupName: dnsZoneResourceGroupName
+    cosmosDnsZoneId: cosmosdbPrivateDnsZoneId
     tags: tags
   }
   dependsOn: [
   ]
 }
 
-output outStorageAccountName string = storage.outputs.outStorageAccountName
-output outStorageFilesysName string = storage.outputs.outStorageFilesysName
+output outStorageAccountName string = storageModule.outputs.outStorageAccountName
+output outStorageFilesysName string = storageModule.outputs.outStorageFilesysName
+output postgresqlId string = postgreSQLModule.outputs.postgreSqlServerId
+output postgresqlName string = postgreSQLModule.outputs.postgreSqlServerName  
+output cosmosDBName string = cosmosModule.outputs.cosmosDBName
+output cosmosDBId string = cosmosModule.outputs.cosmosDBId

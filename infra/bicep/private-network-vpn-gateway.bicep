@@ -11,8 +11,8 @@ param vnetName string
 @description('The name of the virtual network subnet to be used for private endpoints.')
 param privateEndpointSubnetName string
 
-@description('The name of the virtual network subnet to be used for self-hosted integration runtime (SHIR) subnet.')
-param shirSubnetName string
+@description('The name of the virtual network subnet to be used for Fabric Data Gateway subnet.')
+param datagwSubnetName string
 
 @description('The virtual network IP space to use for the new virutal network.')
 param vnetAddressPrefix string
@@ -23,8 +23,8 @@ param privateEndpointSubnetAddressPrefix string
 @description('The IP space to use for the AzureBastionSubnet subnet.')
 param bastionSubnetAddressPrefix string
 
-@description('The IP space to use for the self-hosted integration runtime.')
-param shirSubnetAddressPrefix string
+@description('The IP space to use for Fabric Data Gateway.')
+param datagwSubnetAddressPrefix string
 
 @description('The IP address prefix for the virtual network subnet used for VPN Gateway.')
 param gatewaySubnetAddressPrefix string
@@ -80,21 +80,21 @@ resource defaultSubNet 'Microsoft.Network/virtualNetworks/subnets@2024-03-01' = 
   }
 }
 
-resource shirSubnetNsg 'Microsoft.Network/networkSecurityGroups@2020-05-01' = {
-  name: '${vnetName}-shir-nsg'
+resource datagwSubnetNsg 'Microsoft.Network/networkSecurityGroups@2020-05-01' = {
+  name: '${vnetName}-datagw-nsg'
   location: location
   properties: {
     securityRules: []
   }
 }
 
-resource shirSubNet 'Microsoft.Network/virtualNetworks/subnets@2024-03-01' = {
+resource datagwSubNet 'Microsoft.Network/virtualNetworks/subnets@2024-03-01' = {
   parent: vnet
-  name: shirSubnetName
+  name: datagwSubnetName
   properties: {
-    addressPrefix: shirSubnetAddressPrefix
+    addressPrefix: datagwSubnetAddressPrefix
     networkSecurityGroup: {
-      id: shirSubnetNsg.id // Associate the NSG with the default subnet
+      id: datagwSubnetNsg.id // Associate the NSG with the default subnet
     }
   }
   dependsOn: [
@@ -109,7 +109,7 @@ resource bastionSubNet 'Microsoft.Network/virtualNetworks/subnets@2024-03-01' = 
     addressPrefix: bastionSubnetAddressPrefix
   }
   dependsOn: [
-    shirSubNet
+    datagwSubNet
   ]
 }
 
@@ -276,4 +276,4 @@ resource inboundEndpoint 'Microsoft.Network/dnsResolvers/inboundEndpoints@2025-0
 output outVnetName string = vnet.name
 output outVnetId string = vnet.id
 output outPrivateEndpointSubnetName string = privateEndpointSubnetName
-output outShirSubnetName string = shirSubnetName
+output outDataGWSubnetName string = datagwSubnetName

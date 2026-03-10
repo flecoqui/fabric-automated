@@ -46,4 +46,4 @@ resource fabric 'Microsoft.Fabric/capacities@2023-11-01' = {
   tags: tags
 }
 
-output outPurviewAccountName string = fabric.name
+output outFabricAccountName string = fabric.name

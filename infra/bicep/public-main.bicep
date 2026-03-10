@@ -76,5 +76,5 @@ module fabricModule 'public-fabric.bicep' = {
 }
 
 output outKeyVaultName string = keyVaultModule.outputs.outKeyVaultName
-output outPurviewAccountName string = fabricModule.outputs.outPurviewAccountName
+output outFabricAccountName string = fabricModule.outputs.outFabricAccountName
 

@@ -22,8 +22,8 @@ param privateEndpointSubnetAddressPrefix string = '10.13.0.0/24'
 @description('The IP address prefix for the virtual network subnet used for AzureBastionSubnet subnet.')
 param bastionSubnetAddressPrefix string =  '10.13.1.0/24'
 
-@description('The IP address prefix for the virtual network subnet used for AzureBastionSubnet subnet.')
-param shirSubnetAddressPrefix string =  '10.13.2.0/24'
+@description('The IP address prefix for the virtual network subnet used for Fabric Data gateaway subnet.')
+param datagwSubnetAddressPrefix string =  '10.13.2.0/24'
 
 @description('The IP address prefix for the virtual network subnet used for VPN Gateway.')
 param gatewaySubnetAddressPrefix string = '10.13.3.0/24'
@@ -47,6 +47,9 @@ param dnsZoneSubscriptionId string = subscription().subscriptionId
 ])
 param newOrExistingDnsZones string = 'new'
 
+@description('The principal name of the user or service principal running the script.')
+param principalName string = ''
+
 @description('The user object Id of the user or service principal running the script.')
 param objectId string = ''
 
@@ -69,22 +72,20 @@ var tags = {
 // Networking related variables
 var vnetName = namingModule.outputs.vnetName
 var privateEndpointSubnetName = namingModule.outputs.privateEndpointSubnetName
-var shirSubnetName = namingModule.outputs.shirSubnetName
+var datagwSubnetName = namingModule.outputs.datagwSubnetName
 // Azure Key Vault related variables
 var keyVaultName = namingModule.outputs.keyVaultName
 // Fabric
-var purviewAccountName = namingModule.outputs.purviewAccountName
-
+var fabricAccountName = namingModule.outputs.fabricAccountName
+var fabricSKU = 'F2'
 
 // Private DNS Zone variables
 var privateDnsNames = [
-  'privatelink.servicebus.windows.net'
-  'privatelink.purviewstudio.azure.com'
-  'privatelink.fabric.azure.com'
   'privatelink.vaultcore.azure.net'
   'privatelink.blob.${environment().suffixes.storage}'
   'privatelink.dfs.${environment().suffixes.storage}'
-  'privatelink.queue.${environment().suffixes.storage}'
+  'privatelink.postgres.database.azure.com'
+  'privatelink.documents.azure.com'
 ]
 
 // Defining Private DNS Zones resource group and subscription id
@@ -93,15 +94,9 @@ var calcDnsZoneSubscriptionId = (newOrExistingDnsZones == 'new') ? subscription(
 
 // Getting the Ids for existing or newly created Private DNS Zones
 var keyVaultPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.vaultcore.azure.net')
-var namespacePrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.servicebus.windows.net')
-var portalPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.purviewstudio.azure.com')
-var accountPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.fabric.azure.com')
-var blobPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.blob.${environment().suffixes.storage}')
-var queuePrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.queue.${environment().suffixes.storage}')
 
 
-
-module dnsZone './private-dns-zones.bicep' = if (newOrExistingDnsZones == 'new') {
+module dnsZoneModule './private-dns-zones.bicep' = if (newOrExistingDnsZones == 'new') {
   name: 'dnsZoneDeploy'
   scope: resourceGroup()
   params: {
@@ -110,7 +105,7 @@ module dnsZone './private-dns-zones.bicep' = if (newOrExistingDnsZones == 'new')
   }
 }
 
-module network 'network.bicep' = {
+module networkModule 'private-network-vpn-gateway.bicep' = {
   name: 'networkDeploy'
   scope: resourceGroup()
   params: {
@@ -118,11 +113,11 @@ module network 'network.bicep' = {
     baseName: baseName
     vnetName: vnetName
     privateEndpointSubnetName: privateEndpointSubnetName
-    shirSubnetName: shirSubnetName
+    datagwSubnetName: datagwSubnetName
     vnetAddressPrefix: vnetAddressPrefix
     privateEndpointSubnetAddressPrefix: privateEndpointSubnetAddressPrefix
     bastionSubnetAddressPrefix: bastionSubnetAddressPrefix
-    shirSubnetAddressPrefix: shirSubnetAddressPrefix
+    datagwSubnetAddressPrefix: datagwSubnetAddressPrefix
     gatewaySubnetAddressPrefix: gatewaySubnetAddressPrefix
     dnsDelegationSubnetIPAddress: dnsDelegationSubnetIPAddress
     dnsDelegationSubnetAddressPrefix: dnsDelegationSubnetAddressPrefix
@@ -130,20 +125,20 @@ module network 'network.bicep' = {
   }
 }
 
-module privateDnsZoneVnetLink './dns-zone-vnet-mapping.bicep' = [ for (names, i) in privateDnsNames: {
+module privateDnsZoneVnetLinkModule './dns-zone-vnet-mapping.bicep' = [ for (names, i) in privateDnsNames: {
   name: 'privateDnsZoneVnetLinkDeploy-${i}'
   scope: resourceGroup(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName)
   params: {
     privateDnsZoneName: names
-    vnetId: network.outputs.outVnetId
-    vnetLinkName: '${network.outputs.outVnetName}-link'
+    vnetId: networkModule.outputs.outVnetId
+    vnetLinkName: '${networkModule.outputs.outVnetName}-link'
   }
   dependsOn: [
-    dnsZone
+    dnsZoneModule
   ]
 }]
 
-module keyVault 'private-keyvault.bicep' = {
+module keyVaultModule 'private-keyvault.bicep' = {
   name: 'keyVaultDeploy'
   scope: resourceGroup()
   params: {
@@ -151,39 +146,31 @@ module keyVault 'private-keyvault.bicep' = {
     baseName: baseName
     keyVaultName: keyVaultName
     keyVaultPrivateDnsZoneId: keyVaultPrivateDnsZoneId
-    vnetName: network.outputs.outVnetName
-    subnetName: network.outputs.outPrivateEndpointSubnetName
+    vnetName: networkModule.outputs.outVnetName
+    subnetName: networkModule.outputs.outPrivateEndpointSubnetName
+    objectId: objectId 
+    objectType: objectType
     tags: tags
   }
   dependsOn: [
-    privateDnsZoneVnetLink
+    privateDnsZoneVnetLinkModule
   ]
 }
 
-module fabric 'private-fabric.bicep' = {
+module fabricModule 'private-fabric.bicep' = {
   name: 'FabricDeploy'
   scope: resourceGroup()
   params: {
     location: location
-    baseName: baseName
-    vnetName: network.outputs.outVnetName
-    subnetName: network.outputs.outPrivateEndpointSubnetName
     fabricAccountName: fabricAccountName
-    keyVaultName: keyVault.outputs.outKeyVaultName
-    namespacePrivateDnsZoneId: namespacePrivateDnsZoneId
-    portalPrivateDnsZoneId: portalPrivateDnsZoneId
-    accountPrivateDnsZoneId: accountPrivateDnsZoneId
-    blobPrivateDnsZoneId: blobPrivateDnsZoneId
-    queuePrivateDnsZoneId: queuePrivateDnsZoneId
-    objectId: objectId
-    objectType: objectType
+    fabricSku: fabricSKU
+    fabricAdminId: principalName
+    tags: tags
   }
 }
 
-output outVirtualNetworkName string = network.outputs.outVnetName
-output outPrivateEndpointSubnetName string = network.outputs.outPrivateEndpointSubnetName
-output outShirSubnetName string = network.outputs.outShirSubnetName
-output outKeyVaultName string = keyVault.outputs.outKeyVaultName
-output outPurviewAccountName string = fabric.outputs.outPurviewAccountName
-output outPurviewCatalogUri  string = fabric.outputs.outPurviewCatalogUri
-output outPurviewPrincipalId string = fabric.outputs.outPurviewPrincipalId
+output outVirtualNetworkName string = networkModule.outputs.outVnetName
+output outPrivateEndpointSubnetName string = networkModule.outputs.outPrivateEndpointSubnetName
+output outDataGWSubnetName string = networkModule.outputs.outDataGWSubnetName
+output outKeyVaultName string = keyVaultModule.outputs.outKeyVaultName
+output outFabricAccountName string = fabricModule.outputs.outFabricAccountName

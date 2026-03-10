@@ -1,0 +1,72 @@
+{
+    "status": "Failed",
+    "error": {
+        "code": "DeploymentFailed",
+        "target": "/subscriptions/aeb14f91-b3bc-42f8-ae26-48e6d30e0994/resourceGroups/rgdatasourcedevpri1947/providers/Microsoft.Resources/deployments/private-datasource",
+        "message": "At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.",
+        "details": [
+            {
+                "code": "ResourceDeploymentFailure",
+                "target": "/subscriptions/aeb14f91-b3bc-42f8-ae26-48e6d30e0994/resourceGroups/rgdatasourcedevpri1947/providers/Microsoft.Resources/deployments/CosmosDBDeploy",
+                "message": "The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.",
+                "details": [
+                    {
+                        "code": "DeploymentFailed",
+                        "target": "/subscriptions/aeb14f91-b3bc-42f8-ae26-48e6d30e0994/resourceGroups/rgdatasourcedevpri1947/providers/Microsoft.Resources/deployments/CosmosDBDeploy",
+                        "message": "At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.",
+                        "details": [
+                            {
+                                "code": "InvalidPrivateDnsZoneIds",
+                                "message": "Private Dns Zone group /subscriptions/aeb14f91-b3bc-42f8-ae26-48e6d30e0994/resourceGroups/rgdatasourcedevpri1947/providers/Microsoft.Network/privateEndpoints/pe-cosmos-devpri1947/privateDnsZoneGroups/default has invalid private dns zone ids .",
+                                "details": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "code": "ResourceDeploymentFailure",
+                "target": "/subscriptions/aeb14f91-b3bc-42f8-ae26-48e6d30e0994/resourceGroups/rgdatasourcedevpri1947/providers/Microsoft.Resources/deployments/StorageDeploy",
+                "message": "The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.",
+                "details": [
+                    {
+                        "code": "DeploymentFailed",
+                        "target": "/subscriptions/aeb14f91-b3bc-42f8-ae26-48e6d30e0994/resourceGroups/rgdatasourcedevpri1947/providers/Microsoft.Resources/deployments/StorageDeploy",
+                        "message": "At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.",
+                        "details": [
+                            {
+                                "code": "InvalidPrivateDnsZoneIds",
+                                "message": "Private Dns Zone group /subscriptions/aeb14f91-b3bc-42f8-ae26-48e6d30e0994/resourceGroups/rgdatasourcedevpri1947/providers/Microsoft.Network/privateEndpoints/pe-st-blob-devpri1947/privateDnsZoneGroups/blobPrivateDnsZoneGroup has invalid private dns zone ids .",
+                                "details": []
+                            },
+                            {
+                                "code": "InvalidPrivateDnsZoneIds",
+                                "message": "Private Dns Zone group /subscriptions/aeb14f91-b3bc-42f8-ae26-48e6d30e0994/resourceGroups/rgdatasourcedevpri1947/providers/Microsoft.Network/privateEndpoints/pe-st-dfs-devpri1947/privateDnsZoneGroups/dfsPrivateDnsZoneGroup has invalid private dns zone ids .",
+                                "details": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "code": "ResourceDeploymentFailure",
+                "target": "/subscriptions/aeb14f91-b3bc-42f8-ae26-48e6d30e0994/resourceGroups/rgdatasourcedevpri1947/providers/Microsoft.Resources/deployments/PostgreSQLDeploy",
+                "message": "The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.",
+                "details": [
+                    {
+                        "code": "DeploymentFailed",
+                        "target": "/subscriptions/aeb14f91-b3bc-42f8-ae26-48e6d30e0994/resourceGroups/rgdatasourcedevpri1947/providers/Microsoft.Resources/deployments/PostgreSQLDeploy",
+                        "message": "At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.",
+                        "details": [
+                            {
+                                "code": "InvalidPrivateDnsZoneIds",
+                                "message": "Private Dns Zone group /subscriptions/aeb14f91-b3bc-42f8-ae26-48e6d30e0994/resourceGroups/rgdatasourcedevpri1947/providers/Microsoft.Network/privateEndpoints/pe-pg-devpri1947/privateDnsZoneGroups/default has invalid private dns zone ids .",
+                                "details": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

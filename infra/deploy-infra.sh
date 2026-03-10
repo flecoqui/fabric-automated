@@ -66,7 +66,7 @@ printProgress(){
 usage() {
     echo
     echo "Arguments:"
-    printf " -a  Sets deploy-infra ACTION { azure-login, deploy-public-fabric, deploy-public-datasource, scan-public-datasource, deploy-private-fabric, deploy-private-shir, deploy-private-vnetir, deploy-private-datasource, scan-private-datasource, remove-public-fabric, remove-private-fabric, remove-public-datasource, remove-private-datasource}\n"
+    printf " -a  Sets deploy-infra ACTION { azure-login, deploy-public-fabric, deploy-public-datasource, scan-public-datasource, deploy-private-fabric, deploy-private-datagw, deploy-private-vnetir, deploy-private-datasource, scan-private-datasource, remove-public-fabric, remove-private-fabric, remove-public-datasource, remove-private-datasource}\n"
     printf " -e  Sets the environment - by default 'dev' ('dev', 'test', 'stag', 'prep', 'prod')\n"
     printf " -s  Sets subscription id \n"
     printf " -t  Sets tenant id\n"
@@ -151,8 +151,8 @@ setAzureResourceNames()
     echo "AZURE_VNET_NAME: $AZURE_VNET_NAME"
     AZURE_SUBNET_NAME=$(echo ${RESULT}  | jq -r '.privateEndpointSubnetName.value' 2>/dev/null)
     echo "AZURE_SUBNET_NAME: $AZURE_SUBNET_NAME"
-    AZURE_SHIR_SUBNET_NAME=$(echo ${RESULT}  | jq -r '.shirSubnetName.value' 2>/dev/null)
-    echo "AZURE_SHIR_SUBNET_NAME: $AZURE_SHIR_SUBNET_NAME"
+    AZURE_DATAGW_SUBNET_NAME=$(echo ${RESULT}  | jq -r '.datagwSubnetName.value' 2>/dev/null)
+    echo "AZURE_DATAGW_SUBNET_NAME: $AZURE_DATAGW_SUBNET_NAME"
     AZURE_GATEWAY_SUBNET_NAME=$(echo ${RESULT}  | jq -r '.gatewaySubnetName.value' 2>/dev/null)
     echo "AZURE_GATEWAY_SUBNET_NAME: $AZURE_GATEWAY_SUBNET_NAME"
     AZURE_DNS_DELEGATION_SUBNET_NAME=$(echo ${RESULT}  | jq -r '.dnsDelegationSubNetName.value' 2>/dev/null)
@@ -175,18 +175,18 @@ setAzureResourceNames()
     AZURE_KEY_VAULT_NAME=$(echo ${RESULT}  | jq -r '.keyVaultName.value' 2>/dev/null)
     echo "AZURE_KEY_VAULT_NAME: $AZURE_KEY_VAULT_NAME"
 
-    AZURE_SHIR_VM_NAME=$(echo ${RESULT}  | jq -r '.shirVMSSName.value' 2>/dev/null)
-    echo "AZURE_SHIR_VM_NAME: $AZURE_SHIR_VM_NAME"
-    AZURE_SHIR_LB_NAME=$(echo ${RESULT}  | jq -r '.shirLoadBalancerName.value' 2>/dev/null)
-    echo "AZURE_SHIR_LB_NAME: $AZURE_SHIR_LB_NAME"
+    AZURE_DATAGW_VM_NAME=$(echo ${RESULT}  | jq -r '.datagwVMSSName.value' 2>/dev/null)
+    echo "AZURE_DATAGW_VM_NAME: $AZURE_DATAGW_VM_NAME"
+    AZURE_DATAGW_LB_NAME=$(echo ${RESULT}  | jq -r '.datagwLoadBalancerName.value' 2>/dev/null)
+    echo "AZURE_DATAGW_LB_NAME: $AZURE_DATAGW_LB_NAME"
     AZURE_VPN_GATEWAY_PIP_NAME=$(echo ${RESULT}  | jq -r '.vpnGatewayPublicIpName.value' 2>/dev/null)
     echo "AZURE_VPN_GATEWAY_PIP_NAME: $AZURE_VPN_GATEWAY_PIP_NAME"
     AZURE_DNS_RESOLVER_NAME=$(echo ${RESULT}  | jq -r '.dnsResolverName.value' 2>/dev/null)
     echo "AZURE_DNS_RESOLVER_NAME: $AZURE_DNS_RESOLVER_NAME"
 
 
-    AZURE_PURVIEW_SHIR_NAME=$(echo ${RESULT}  | jq -r '.purviewShirName.value' 2>/dev/null)
-    echo "AZURE_PURVIEW_SHIR_NAME: $AZURE_PURVIEW_SHIR_NAME"
+    AZURE_PURVIEW_DATAGW_NAME=$(echo ${RESULT}  | jq -r '.purviewShirName.value' 2>/dev/null)
+    echo "AZURE_PURVIEW_DATAGW_NAME: $AZURE_PURVIEW_DATAGW_NAME"
     AZURE_PURVIEW_VNETIR_NAME=$(echo ${RESULT}  | jq -r '.purviewVnetIrName.value' 2>/dev/null)
     echo "AZURE_PURVIEW_VNETIR_NAME: $AZURE_PURVIEW_VNETIR_NAME"
     AZURE_PURVIEW_MANAGED_VNET_NAME=$(echo ${RESULT}  | jq -r '.purviewManagedVnetName.value' 2>/dev/null)
@@ -199,12 +199,12 @@ setAzureResourceNames()
     echo "AZURE_PURVIEW_SCAN_RULE_SETS_NAME: $AZURE_PURVIEW_SCAN_RULE_SETS_NAME"
     AZURE_PURVIEW_SCAN_NAME=$(echo ${RESULT}  | jq -r '.purviewScanName.value' 2>/dev/null)
     echo "AZURE_PURVIEW_SCAN_NAME: $AZURE_PURVIEW_SCAN_NAME"
-    AZURE_PURVIEW_SHIR_KEY_SECRET_NAME=$(echo ${RESULT}  | jq -r '.purviewShirKeyName.value' 2>/dev/null)
-    echo "AZURE_PURVIEW_SHIR_KEY_SECRET_NAME: $AZURE_PURVIEW_SHIR_KEY_SECRET_NAME"
-    AZURE_PURVIEW_SHIR_VM_LOGIN_SECRET_NAME=$(echo ${RESULT}  | jq -r '.purviewShirVMLoginName.value' 2>/dev/null)
-    echo "AZURE_PURVIEW_SHIR_VM_LOGIN_SECRET_NAME: $AZURE_PURVIEW_SHIR_VM_LOGIN_SECRET_NAME"
-    AZURE_PURVIEW_SHIR_VM_PASSWORD_SECRET_NAME=$(echo ${RESULT}  | jq -r '.purviewShirVMPassSecretName.value' 2>/dev/null)
-    echo "AZURE_PURVIEW_SHIR_VM_PASSWORD_SECRET_NAME: $AZURE_PURVIEW_SHIR_VM_PASSWORD_SECRET_NAME"
+    AZURE_PURVIEW_DATAGW_KEY_SECRET_NAME=$(echo ${RESULT}  | jq -r '.purviewShirKeyName.value' 2>/dev/null)
+    echo "AZURE_PURVIEW_DATAGW_KEY_SECRET_NAME: $AZURE_PURVIEW_DATAGW_KEY_SECRET_NAME"
+    AZURE_PURVIEW_DATAGW_VM_LOGIN_SECRET_NAME=$(echo ${RESULT}  | jq -r '.purviewShirVMLoginName.value' 2>/dev/null)
+    echo "AZURE_PURVIEW_DATAGW_VM_LOGIN_SECRET_NAME: $AZURE_PURVIEW_DATAGW_VM_LOGIN_SECRET_NAME"
+    AZURE_PURVIEW_DATAGW_VM_PASSWORD_SECRET_NAME=$(echo ${RESULT}  | jq -r '.purviewShirVMPassSecretName.value' 2>/dev/null)
+    echo "AZURE_PURVIEW_DATAGW_VM_PASSWORD_SECRET_NAME: $AZURE_PURVIEW_DATAGW_VM_PASSWORD_SECRET_NAME"
     AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME=$(echo ${RESULT}  | jq -r '.postgreSqlAdministratorLoginSecretName.value' 2>/dev/null)
     echo "AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME: $AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME"
     AZURE_POSTGRESQL_ADMINISTRATOR_PASSWORD_SECRET_NAME=$(echo ${RESULT}  | jq -r '.postgreSqlAdministratorPassSecretName.value' 2>/dev/null)
@@ -627,72 +627,72 @@ getFabricWorkspaceIdentity() {
 }
 
 ##############################################################################
-#- getPurviewToken
+#- getFabricToken
 ##############################################################################
-getPurviewToken() {
+getFabricToken() {
   bearer_token=$(az account get-access-token --resource https://fabric.azure.net --output json | jq -r .accessToken)
   echo "$bearer_token"
 }
 ##############################################################################
-#- createPurviewSHIR
+#- createFabricDATAGW
 ##############################################################################
-createPurviewSHIR() {
+createFabricDATAGW() {
 
   PURVIEW_ACCOUNT_NAME=$1
-  PURVIEW_SHIR_NAME=$2
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_DATAGW_NAME=$2
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
   fi
 
   cmd="curl --request PUT \
-  --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/integrationRuntimes/$PURVIEW_SHIR_NAME?api-version=2022-02-01-preview\" \
+  --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/integrationRuntimes/$PURVIEW_DATAGW_NAME?api-version=2022-02-01-preview\" \
   --header \"authorization: Bearer $PURVIEW_TOKEN\" \
   --header \"content-type: application/json\" \
   --fail --silent --show-error \
-  --data '{\"name\": \"$PURVIEW_SHIR_NAME\",\"kind\":\"SelfHosted\",\"properties\":{}}'"
+  --data '{\"name\": \"$PURVIEW_DATAGW_NAME\",\"kind\":\"SelfHosted\",\"properties\":{}}'"
   printProgress "$cmd"
   eval "$cmd" > /dev/null
 
 }
 ##############################################################################
-#- doesPurviewSHIRExist
+#- doesFabricDATAGWExist
 ##############################################################################
-doesPurviewSHIRExist() {
+doesFabricDATAGWExist() {
   RESULT="false"
   PURVIEW_ACCOUNT_NAME=$1
-  PURVIEW_SHIR_NAME=$2
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_DATAGW_NAME=$2
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
   fi
 
   cmd="curl --request GET \
-  --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/integrationRuntimes/$PURVIEW_SHIR_NAME?api-version=2022-02-01-preview\" \
+  --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/integrationRuntimes/$PURVIEW_DATAGW_NAME?api-version=2022-02-01-preview\" \
   --header \"authorization: Bearer $PURVIEW_TOKEN\" \
   --header \"content-type: application/json\" \
   --fail --silent --show-error 2>/dev/null "
   # printProgress "$cmd"
-  SHIR_NAME=$(eval "$cmd" | jq -r .name)
-  # echo "SHIR_NAME: $SHIR_NAME"
-  # echo "PURVIEW_SHIR_NAME: $PURVIEW_SHIR_NAME"
-  if [ "$SHIR_NAME" = "$PURVIEW_SHIR_NAME" ]; then
+  DATAGW_NAME=$(eval "$cmd" | jq -r .name)
+  # echo "DATAGW_NAME: $DATAGW_NAME"
+  # echo "PURVIEW_DATAGW_NAME: $PURVIEW_DATAGW_NAME"
+  if [ "$DATAGW_NAME" = "$PURVIEW_DATAGW_NAME" ]; then
         RESULT="true"
   fi
   echo "$RESULT"
 }
 ##############################################################################
-#- createPurviewManagedVNET
+#- createFabricManagedVNET
 ##############################################################################
-createPurviewManagedVNET() {
+createFabricManagedVNET() {
   PURVIEW_ACCOUNT_NAME=$1
-  PURVIEW_SHIR_NAME=$2
+  PURVIEW_DATAGW_NAME=$2
   PURVIEW_LOCATION=$3
   MANAGED_VNET_NAME=$4
 
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -708,15 +708,15 @@ createPurviewManagedVNET() {
   eval "$cmd"
 }
 ##############################################################################
-#- doesPurviewManagedVNETExist
+#- doesFabricManagedVNETExist
 ##############################################################################
-doesPurviewManagedVNETExist() {
+doesFabricManagedVNETExist() {
   RESULT="false"
   PURVIEW_ACCOUNT_NAME=$1
-  PURVIEW_SHIR_NAME=$2
+  PURVIEW_DATAGW_NAME=$2
   MANAGED_VNET_NAME=$3
 
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -729,39 +729,39 @@ doesPurviewManagedVNETExist() {
   # printProgress "$cmd"
   VNET_NAME=$(eval "$cmd" | jq -r .name)
   # echo "VNET_NAME: $VNET_NAME"
-  # echo "PURVIEW_SHIR_NAME: $PURVIEW_SHIR_NAME"
+  # echo "PURVIEW_DATAGW_NAME: $PURVIEW_DATAGW_NAME"
   if [ "$VNET_NAME" = "$MANAGED_VNET_NAME" ]; then
         RESULT="true"
   fi
   echo "$RESULT"
 }
 ##############################################################################
-#- createPurviewVNETIR
+#- createFabricVNETIR
 ##############################################################################
-createPurviewVNETIR() {
+createFabricVNETIR() {
   PURVIEW_ACCOUNT_NAME=$1
-  PURVIEW_SHIR_NAME=$2
+  PURVIEW_DATAGW_NAME=$2
   PURVIEW_LOCATION=$3
   MANAGED_VNET_NAME=$4
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
   fi
-  printProgress "Create VNET IR '$PURVIEW_SHIR_NAME' in Fabric account '$PURVIEW_ACCOUNT_NAME'"
+  printProgress "Create VNET IR '$PURVIEW_DATAGW_NAME' in Fabric account '$PURVIEW_ACCOUNT_NAME'"
   cmd="curl --request PUT \
-  --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/integrationruntimes/$PURVIEW_SHIR_NAME?api-version=2022-02-01-preview\" \
+  --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/integrationruntimes/$PURVIEW_DATAGW_NAME?api-version=2022-02-01-preview\" \
   --header \"authorization: Bearer $PURVIEW_TOKEN\" \
   --header \"content-type: application/json\" \
   --fail --silent --show-error \
-  --data '{\"kind\":\"Managed\",\"name\":\"$PURVIEW_SHIR_NAME\",\"properties\":{\"managedVirtualNetwork\":{\"referenceName\":\"$MANAGED_VNET_NAME\",\"type\":\"ManagedVirtualNetworkReference\"},\"typeProperties\":{\"computeProperties\":{\"location\":\"$PURVIEW_LOCATION\"}}}}'"
+  --data '{\"kind\":\"Managed\",\"name\":\"$PURVIEW_DATAGW_NAME\",\"properties\":{\"managedVirtualNetwork\":{\"referenceName\":\"$MANAGED_VNET_NAME\",\"type\":\"ManagedVirtualNetworkReference\"},\"typeProperties\":{\"computeProperties\":{\"location\":\"$PURVIEW_LOCATION\"}}}}'"
   printProgress "$cmd"
   eval "$cmd"
 }
 ##############################################################################
-#- waitPurviewVNETIRPrivateEndpoints
+#- waitFabricVNETIRPrivateEndpoints
 ##############################################################################
-waitPurviewVNETIRPrivateEndpoints() {
+waitFabricVNETIRPrivateEndpoints() {
   CMD=$1
   COUNTER=1
   MAX=30
@@ -779,14 +779,14 @@ waitPurviewVNETIRPrivateEndpoints() {
 }
 
 ##############################################################################
-#- createPurviewVNETIRPrivateEndpoints
+#- createFabricVNETIRPrivateEndpoints
 ##############################################################################
-createPurviewVNETIRPrivateEndpoints() {
+createFabricVNETIRPrivateEndpoints() {
   PURVIEW_ACCOUNT_NAME=$1
-  PURVIEW_SHIR_NAME=$2
+  PURVIEW_DATAGW_NAME=$2
   PURVIEW_LOCATION=$3
   MANAGED_VNET_NAME=$4
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -799,7 +799,7 @@ createPurviewVNETIRPrivateEndpoints() {
   BLOB_ENDPOINT_NAME="${PURVIEW_ACCOUNT_NAME}-blob-ep"
   QUEUE_ENDPOINT_NAME="${PURVIEW_ACCOUNT_NAME}-queue-ep"
 
-  printProgress "Create or update Private Endpoints in Fabric SHIR '$PURVIEW_SHIR_NAME' for platform ${PLATFORM_ENDPOINT_NAME}"
+  printProgress "Create or update Private Endpoints in Fabric DATAGW '$PURVIEW_DATAGW_NAME' for platform ${PLATFORM_ENDPOINT_NAME}"
   cmd="curl --request PUT \
   --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/managedVirtualNetworks/$MANAGED_VNET_NAME/managedPrivateEndpoints/$PLATFORM_ENDPOINT_NAME?api-version=2022-02-01-preview\" \
   --header \"authorization: Bearer $PURVIEW_TOKEN\" \
@@ -809,7 +809,7 @@ createPurviewVNETIRPrivateEndpoints() {
   printProgress "$cmd"
   eval "$cmd"
 
-  printProgress "Create or update Private Endpoints in Fabric SHIR '$PURVIEW_SHIR_NAME' for blob ${BLOB_ENDPOINT_NAME}"
+  printProgress "Create or update Private Endpoints in Fabric DATAGW '$PURVIEW_DATAGW_NAME' for blob ${BLOB_ENDPOINT_NAME}"
   cmd="curl --request PUT \
   --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/managedVirtualNetworks/$MANAGED_VNET_NAME/managedPrivateEndpoints/$BLOB_ENDPOINT_NAME?api-version=2022-02-01-preview\" \
   --header \"authorization: Bearer $PURVIEW_TOKEN\" \
@@ -819,7 +819,7 @@ createPurviewVNETIRPrivateEndpoints() {
   printProgress "$cmd"
   eval "$cmd"
 
-  printProgress "Create or update Private Endpoints in Fabric SHIR '$PURVIEW_SHIR_NAME' for queue ${QUEUE_ENDPOINT_NAME}"
+  printProgress "Create or update Private Endpoints in Fabric DATAGW '$PURVIEW_DATAGW_NAME' for queue ${QUEUE_ENDPOINT_NAME}"
   cmd="curl --request PUT \
   --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/managedVirtualNetworks/$MANAGED_VNET_NAME/managedPrivateEndpoints/$QUEUE_ENDPOINT_NAME?api-version=2022-02-01-preview\" \
   --header \"authorization: Bearer $PURVIEW_TOKEN\" \
@@ -829,42 +829,42 @@ createPurviewVNETIRPrivateEndpoints() {
   printProgress "$cmd"
   eval "$cmd"
 
-  printProgress "Wait for Private Endpoints in Fabric SHIR '$PURVIEW_SHIR_NAME' for platform ${PLATFORM_ENDPOINT_NAME}"
+  printProgress "Wait for Private Endpoints in Fabric DATAGW '$PURVIEW_DATAGW_NAME' for platform ${PLATFORM_ENDPOINT_NAME}"
   cmd="curl --request GET \
   --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/managedVirtualNetworks/$MANAGED_VNET_NAME/managedPrivateEndpoints/$PLATFORM_ENDPOINT_NAME?api-version=2022-02-01-preview\" \
   --header \"authorization: Bearer $PURVIEW_TOKEN\" \
   --header \"content-type: application/json\" \
   --fail --silent --show-error"
   printProgress "$cmd"
-  waitPurviewVNETIRPrivateEndpoints "$cmd"
+  waitFabricVNETIRPrivateEndpoints "$cmd"
 
-  printProgress "Wait for Private Endpoints in Fabric SHIR '$PURVIEW_SHIR_NAME' for blob ${BLOB_ENDPOINT_NAME}"
+  printProgress "Wait for Private Endpoints in Fabric DATAGW '$PURVIEW_DATAGW_NAME' for blob ${BLOB_ENDPOINT_NAME}"
   cmd="curl --request GET \
   --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/managedVirtualNetworks/$MANAGED_VNET_NAME/managedPrivateEndpoints/$BLOB_ENDPOINT_NAME?api-version=2022-02-01-preview\" \
   --header \"authorization: Bearer $PURVIEW_TOKEN\" \
   --header \"content-type: application/json\" \
   --fail --silent --show-error"
   printProgress "$cmd"
-  waitPurviewVNETIRPrivateEndpoints "$cmd"
+  waitFabricVNETIRPrivateEndpoints "$cmd"
 
-  printProgress "Wait for Private Endpoints in Fabric SHIR '$PURVIEW_SHIR_NAME' for queue ${QUEUE_ENDPOINT_NAME}"
+  printProgress "Wait for Private Endpoints in Fabric DATAGW '$PURVIEW_DATAGW_NAME' for queue ${QUEUE_ENDPOINT_NAME}"
   cmd="curl --request GET \
   --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/managedVirtualNetworks/$MANAGED_VNET_NAME/managedPrivateEndpoints/$QUEUE_ENDPOINT_NAME?api-version=2022-02-01-preview\" \
   --header \"authorization: Bearer $PURVIEW_TOKEN\" \
   --header \"content-type: application/json\" \
   --fail --silent --show-error"
   printProgress "$cmd"
-  waitPurviewVNETIRPrivateEndpoints "$cmd"
+  waitFabricVNETIRPrivateEndpoints "$cmd"
 }
 
 ##############################################################################
-#- approvePurviewVNETIRPrivateEndpoints
+#- approveFabricVNETIRPrivateEndpoints
 ##############################################################################
-approvePurviewVNETIRPrivateEndpoints() {
+approveFabricVNETIRPrivateEndpoints() {
   PURVIEW_ACCOUNT_NAME=$1
-  PURVIEW_SHIR_NAME=$2
+  PURVIEW_DATAGW_NAME=$2
   PURVIEW_LOCATION=$3
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -898,39 +898,39 @@ approvePurviewVNETIRPrivateEndpoints() {
 
 
 ##############################################################################
-#- doesPurviewVNETIRExist
+#- doesFabricVNETIRExist
 ##############################################################################
-doesPurviewVNETIRExist() {
+doesFabricVNETIRExist() {
   RESULT="false"
   PURVIEW_ACCOUNT_NAME=$1
-  PURVIEW_SHIR_NAME=$2
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_DATAGW_NAME=$2
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
   fi
 
   cmd="curl --request GET \
-  --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/integrationruntimes/$PURVIEW_SHIR_NAME?api-version=2022-02-01-preview\" \
+  --url \"https://$PURVIEW_ACCOUNT_NAME.fabric.azure.com/scan/integrationruntimes/$PURVIEW_DATAGW_NAME?api-version=2022-02-01-preview\" \
   --header \"authorization: Bearer $PURVIEW_TOKEN\" \
   --header \"content-type: application/json\" \
   --fail --silent --show-error 2>/dev/null "
   # printProgress "$cmd"
-  SHIR_NAME=$(eval "$cmd" | jq -r .name)
-  # echo "SHIR_NAME: $SHIR_NAME"
-  # echo "PURVIEW_SHIR_NAME: $PURVIEW_SHIR_NAME"
-  if [ "$SHIR_NAME" = "$PURVIEW_SHIR_NAME" ]; then
+  DATAGW_NAME=$(eval "$cmd" | jq -r .name)
+  # echo "DATAGW_NAME: $DATAGW_NAME"
+  # echo "PURVIEW_DATAGW_NAME: $PURVIEW_DATAGW_NAME"
+  if [ "$DATAGW_NAME" = "$PURVIEW_DATAGW_NAME" ]; then
         RESULT="true"
   fi
   echo "$RESULT"
 }
 ##############################################################################
-#- isPurviewAPIAvailable
+#- isFabricAPIAvailable
 ##############################################################################
-isPurviewAPIAvailable() {
+isFabricAPIAvailable() {
   RESULT="false"
   PURVIEW_ACCOUNT_NAME=$1
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -951,24 +951,24 @@ isPurviewAPIAvailable() {
 }
 
 ##############################################################################
-#- getPurviewSHIRKey
+#- getFabricDATAGWKey
 ##############################################################################
-getPurviewSHIRKey() {
+getFabricDATAGWKey() {
   PURVIEW_ACCOUNT_NAME=$1
-  PURVIEW_SHIR_NAME=$2
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_DATAGW_NAME=$2
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
   fi
 
-  PURVIEW_SHIR_KEY=$(curl --request POST \
-    --url "https://$PURVIEW_ACCOUNT_NAME.proxy.fabric.azure.com/integrationRuntimes/$PURVIEW_SHIR_NAME/listAuthKeys?api-version=2020-12-01-preview" \
+  PURVIEW_DATAGW_KEY=$(curl --request POST \
+    --url "https://$PURVIEW_ACCOUNT_NAME.proxy.fabric.azure.com/integrationRuntimes/$PURVIEW_DATAGW_NAME/listAuthKeys?api-version=2020-12-01-preview" \
     --header "authorization: Bearer $PURVIEW_TOKEN" \
     --header 'content-type: application/json' \
     --fail --silent --show-error \
-    --data '{"name": "'"$PURVIEW_SHIR_NAME"'","properties":{"type":"SelfHosted"}}' | jq -r .authKey1)
-  echo "$PURVIEW_SHIR_KEY"
+    --data '{"name": "'"$PURVIEW_DATAGW_NAME"'","properties":{"type":"SelfHosted"}}' | jq -r .authKey1)
+  echo "$PURVIEW_DATAGW_KEY"
 }
 ##############################################################################
 #- doesCollectionExist
@@ -977,7 +977,7 @@ doesCollectionExist() {
   RESULT="false"
   PURVIEW_ACCOUNT_NAME=$1
   COLLECTION_NAME=${PURVIEW_ACCOUNT_NAME}
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -1004,7 +1004,7 @@ createCollection() {
   PURVIEW_ACCOUNT_NAME=$1
   COLLECTION_NAME=${PURVIEW_ACCOUNT_NAME}
 
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -1026,7 +1026,7 @@ doesDatasourceExist() {
   RESULT="false"
   PURVIEW_ACCOUNT_NAME=$1
   DATASOURCE_NAME=$2
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -1062,7 +1062,7 @@ createDatasource() {
   else
     STORAGE_CONTAINER_NAME=$8
   fi
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -1095,7 +1095,7 @@ doesScanRuleSetExist() {
   RESULT="false"
   PURVIEW_ACCOUNT_NAME=$1
   SCANRULESET_NAME=$2
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -1123,7 +1123,7 @@ createScanRuleSet() {
   SCANRULESET_NAME=$2
   DOMAIN_NAME=$PURVIEW_ACCOUNT_NAME
 
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -1156,7 +1156,7 @@ doesScanExist() {
   PURVIEW_ACCOUNT_NAME=$1
   DATASOURCE_NAME=$2
   SCAN_NAME=$3
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -1185,11 +1185,11 @@ createPrivateScan() {
   SCAN_NAME=$3
   COLLECTION_NAME=$4
   SCANRULESET_NAME=$5
-  SHIR_NAME=$6
-  SHIR_TYPE=$7
+  DATAGW_NAME=$6
+  DATAGW_TYPE=$7
   MANAGED_VNET_NAME=$8
 
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -1203,7 +1203,7 @@ createPrivateScan() {
   --data '{\"name\":\"${SCAN_NAME}\",\
            \"kind\":\"AdlsGen2Msi\",\
            \"properties\":{\
-              \"connectedVia\":{\"referenceName\":\"${SHIR_NAME}\",\"integrationRuntimeType\":\"${SHIR_TYPE}\",\"managedVNetName\":\"${MANAGED_VNET_NAME}\"},\
+              \"connectedVia\":{\"referenceName\":\"${DATAGW_NAME}\",\"integrationRuntimeType\":\"${DATAGW_TYPE}\",\"managedVNetName\":\"${MANAGED_VNET_NAME}\"},\
               \"scanScopeType\":\"AutoDetect\",\
               \"collection\":{\"type\":\"CollectionReference\",\"referenceName\":\"${COLLECTION_NAME}\"},\
               \"scanRulesetType\":\"Custom\",\
@@ -1222,7 +1222,7 @@ createPublicScan() {
   COLLECTION_NAME=$4
   SCANRULESET_NAME=$5
 
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -1253,7 +1253,7 @@ triggerScan() {
   DATASOURCE_NAME=$2
   SCAN_NAME=$3
 
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -1289,7 +1289,7 @@ getScanStatus() {
   SCAN_NAME=$3
   SCAN_ID=$4
 
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -1313,7 +1313,7 @@ getScanStatistics() {
   SCAN_NAME=$3
   SCAN_ID=$4
 
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -1337,7 +1337,7 @@ getScanError() {
   SCAN_NAME=$3
   SCAN_ID=$4
 
-  PURVIEW_TOKEN=$(getPurviewToken)
+  PURVIEW_TOKEN=$(getFabricToken)
   if [ -z "$PURVIEW_TOKEN" ]; then
     printError "Cannot get Fabric token"
     exit 1
@@ -1435,109 +1435,108 @@ installSqlcmd(){
     source ~/.bashrc
 }
 ##############################################################################
-#- createPurviewStorageManagedPrivateEndpoints
+#- createFabricPostgreSQLManagedPrivateEndpoints 
 ##############################################################################
-createPurviewStorageManagedPrivateEndpoints ()
+createFabricPostgreSQLManagedPrivateEndpoints ()
 {
-    fabric="$1"
+    workspaceName="$1"
     resourceGroup="$2"
-    storage="$3"
-    managedVNET="$4"
-    groupId="$5"
-    apiVersion="2023-09-01"
-    endpointName="mpe-${storage}-${groupId}"
-    storageResourceId=$(az storage account show -n $storage  -g $resourceGroup --query id -o tsv)
-    token=$(az account get-access-token --resource https://fabric.azure.net --query accessToken -o tsv)
+    postgresql="$3"
+    groupId="postgresqlServer"
+    endpointName="mpe-${postgresql}-${groupId}"
+    postgresqlResourceId=$(az postgres flexible-server show -n $postgresql  -g $resourceGroup --query id -o tsv)
+    token=$(az account get-access-token   --resource https://api.fabric.microsoft.com   --query accessToken -o tsv)
+    workspaceId=$(getFabricWorkspaceId $workspaceName)
 
     printProgress "Creating Managed Private Endpoint: $endpointName"
-    curl -X PUT \
-    -H "Authorization: Bearer $token" \
-    -H "Content-Type: application/json" \
-    -d "{
-            \"properties\": {
-            \"privateLinkResourceId\": \"$storageResourceId\",
-            \"groupId\": \"${groupId}\",
-            \"connectionState\": {
-                \"status\": \"Pending\",
-                \"description\": \"Requesting private endpoint to Storage Account\"
-            }
-            }
-        }" \
-    "https://$fabric.fabric.azure.com/scan/managedvirtualnetworks/${managedVNET}/managedprivateendpoints/$endpointName?api-version=$apiVersion"
+    curl --request POST \
+        --url "https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/managedPrivateEndpoints" \
+        --header "Authorization: Bearer $token" \
+        --header "Content-Type: application/json" \
+        --data  "{\"name\": \"${endpointName}\",\"targetPrivateLinkResourceId\": \"${postgresqlResourceId}\",\"targetSubresourceType\": \"${groupId}\",\"requestMessage\": \"Fabric access request for PostgreSQL\"}" \
+        --fail --silent --show-error 
+    sleep 30
+    for arg in $(az postgres flexible-server show -n ${postgresql}  -g ${resourceGroup} --query "privateEndpointConnections[?privateLinkServiceConnectionState.status=='Pending'].id" -o tsv); do
+        printProgress "Approving private Endpoint Connection: $arg"
+        az postgres flexible-server private-endpoint-connection approve --id $arg 
+    done
+}
+##############################################################################
+#- createFabricCosmosDBManagedPrivateEndpoints 
+##############################################################################
+createFabricCosmosDBManagedPrivateEndpoints ()
+{
+    workspaceName="$1"
+    resourceGroup="$2"
+    cosmosdb="$3"
+    groupId="sql"
+    endpointName="mpe-${cosmosdb}-${groupId}"
+    cosmosdbResourceId=$(az cosmosdb show -n $cosmosdb  -g $resourceGroup --query id -o tsv)
+    token=$(az account get-access-token   --resource https://api.fabric.microsoft.com   --query accessToken -o tsv)
+    workspaceId=$(getFabricWorkspaceId $workspaceName)
 
+    printProgress "Creating Managed Private Endpoint: $endpointName"
+    curl --request POST \
+        --url "https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/managedPrivateEndpoints" \
+        --header "Authorization: Bearer $token" \
+        --header "Content-Type: application/json" \
+        --data  "{\"name\": \"${endpointName}\",\"targetPrivateLinkResourceId\": \"${cosmosdbResourceId}\",\"targetSubresourceType\": \"${groupId}\",\"requestMessage\": \"Fabric access request for Cosmos DB\"}" \
+        --fail --silent --show-error 
+    sleep 30
+    for arg in $(az cosmosdb show -n ${cosmosdb}  -g ${resourceGroup} --query "privateEndpointConnections[?privateLinkServiceConnectionState.status=='Pending'].id" -o tsv); do
+        printProgress "Approving private Endpoint Connection: $arg"
+        az cosmosdb private-endpoint-connection approve --id $arg 
+    done
+
+}
+##############################################################################
+#- createFabricStorageManagedPrivateEndpoints
+##############################################################################
+createFabricStorageManagedPrivateEndpoints ()
+{
+    workspaceName="$1"
+    resourceGroup="$2"
+    storage="$3"
+    groupId="blob"
+    endpointName="mpe-${storage}-${groupId}"
+    storageResourceId=$(az storage account show -n $storage  -g $resourceGroup --query id -o tsv)
+    token=$(az account get-access-token   --resource https://api.fabric.microsoft.com   --query accessToken -o tsv)
+    workspaceId=$(getFabricWorkspaceId $workspaceName)
+
+    printProgress "Creating Managed Private Endpoint: $endpointName"
+    curl --request POST \
+        --url "https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/managedPrivateEndpoints" \
+        --header "Authorization: Bearer $token" \
+        --header "Content-Type: application/json" \
+        --data  "{\"name\": \"${endpointName}\",\"targetPrivateLinkResourceId\": \"${storageResourceId}\",\"targetSubresourceType\": \"${groupId}\",\"requestMessage\": \"Fabric access request for Storage Account\"}" \
+        --fail --silent --show-error 
     sleep 30
     for arg in $(az storage account show -n ${storage}  -g ${resourceGroup} --query "privateEndpointConnections[?privateLinkServiceConnectionState.status=='Pending'].id" -o tsv); do
         printProgress "Approving private Endpoint Connection: $arg"
         az storage account private-endpoint-connection approve --id $arg 
     done
 }
-
-
 ##############################################################################
-#- createPurviewSynapseManagedPrivateEndpoints
+#- createFabricKeyVaultManagedPrivateEndpoints
 ##############################################################################
-createPurviewSynapseManagedPrivateEndpoints ()
+createFabricKeyVaultManagedPrivateEndpoints ()
 {
-    fabric="$1"
-    resourceGroup="$2"
-    synapse="$3"
-    managedVNET="$4"
-    groupId="$5"
-    endpointName="mpe-${synapse}-${groupId}"
-    synapseResourceId=$(az synapse workspace show -n $synapse -g $resourceGroup --query id -o tsv)
-    token=$(az account get-access-token --resource https://fabric.azure.net --query accessToken -o tsv)
-
-    printProgress "Creating Managed Private Endpoint: $endpointName"
-    curl -X PUT \
-    -H "Authorization: Bearer $token" \
-    -H "Content-Type: application/json" \
-    -d "{
-            \"properties\": {
-            \"privateLinkResourceId\": \"$synapseResourceId\",
-            \"groupId\": \"${groupId}\",
-            \"connectionState\": {
-                \"status\": \"Pending\",
-                \"description\": \"Requesting private endpoint to Synapse Workspace\"
-            }
-            }
-        }" \
-    "https://$fabric.fabric.azure.com/scan/managedvirtualnetworks/${managedVNET}/managedprivateendpoints/$endpointName?api-version=$apiVersion"
-
-    sleep 30
-    for arg in $(az synapse workspace show -n ${synapse}  -g ${resourceGroup} --query "privateEndpointConnections[?privateLinkServiceConnectionState.status=='Pending'].id" -o tsv); do
-        printProgress "Approving private Endpoint Connection: $arg"
-        az network private-endpoint-connection approve --id $arg  
-    done
-}
-
-##############################################################################
-#- createSynapseKeyVaultManagedPrivateEndpoints
-##############################################################################
-createSynapseKeyVaultManagedPrivateEndpoints ()
-{
-    synapse="$1"
+    workspaceName="$1"
     resourceGroup="$2"
     keyVault="$3"
     groupId="vault"
     endpointName="mpe-${keyVault}-${groupId}"
     keyVaultResourceId=$(az keyvault show -n $keyVault -g $resourceGroup --query id -o tsv)
-    token=$(az account get-access-token --resource https://fabric.azure.net --query accessToken -o tsv)
+    token=$(az account get-access-token   --resource https://api.fabric.microsoft.com   --query accessToken -o tsv)
+    workspaceId=$(getFabricWorkspaceId $workspaceName)
 
     printProgress "Creating Managed Private Endpoint: $endpointName"
-    tmpdir=$(mktemp -d)
-    cat <<EOF > $tmpdir/endpoint.json
-{
-"privateLinkResourceId": "$keyVaultResourceId",
-"groupId": "$groupId"
-}
-EOF
-
-    # Create the endpoint
-    az synapse managed-private-endpoints create \
-    --workspace-name $synapse \
-    --pe-name $endpointName \
-    --file @$tmpdir/endpoint.json
-
+    curl --request POST \
+        --url "https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/managedPrivateEndpoints" \
+        --header "Authorization: Bearer $token" \
+        --header "Content-Type: application/json" \
+        --data  "{\"name\": \"${endpointName}\",\"targetPrivateLinkResourceId\": \"${keyVaultResourceId}\",\"targetSubresourceType\": \"${groupId}\",\"requestMessage\": \"Fabric access request for Key Vault\"}" \
+        --fail --silent --show-error 
     sleep 30
     for arg in $(az keyvault show -n ${keyVault} -g ${resourceGroup}  --query "properties.privateEndpointConnections[?privateLinkServiceConnectionState.status=='Pending'].id" -o tsv); do
         printProgress "Approving private Endpoint Connection: $arg"
@@ -1545,39 +1544,6 @@ EOF
     done
 }
 
-#- createSynapsePurviewManagedPrivateEndpoints
-##############################################################################
-createSynapsePurviewManagedPrivateEndpoints ()
-{
-    synapse="$1"
-    resourceGroup="$2"
-    fabric="$3"
-    groupId="account"
-    endpointName="mpe-${fabric}-${groupId}"
-    purviewResourceId=$(az fabric account show -n $fabric -g $resourceGroup --query id -o tsv)
-    token=$(az account get-access-token --resource https://fabric.azure.net --query accessToken -o tsv)
-
-    printProgress "Creating Managed Private Endpoint: $endpointName"
-    tmpdir=$(mktemp -d)
-    cat <<EOF > $tmpdir/endpoint.json
-{
-    "privateLinkResourceId": "$purviewResourceId",
-    "groupId": "$groupId"
-}
-EOF
-
-    # Create the endpoint
-    az synapse managed-private-endpoints create \
-    --workspace-name $synapse \
-    --pe-name $endpointName \
-    --file @$tmpdir/endpoint.json
-
-    sleep 30
-    for arg in $(az fabric account show -n ${fabric} -g ${resourceGroup}  --query "privateEndpointConnections[?privateLinkServiceConnectionState.status=='Pending'].id" -o tsv); do
-        printProgress "Approving private Endpoint Connection: $arg"
-        az network private-endpoint-connection approve --id $arg --description "Programmatically Approved"
-    done
-}
 
 DEFAULT_ACTION="action not set"
 if [ -d "$SCRIPTS_DIRECTORY/../.config" ]; then
@@ -1590,7 +1556,7 @@ DEFAULT_REGION="westus3"
 DEFAULT_SUBSCRIPTION_ID=""
 DEFAULT_TENANT_ID=""
 DEFAULT_RESOURCE_GROUP="rg${DEFAULT_ENVIRONMENT}publicpurview"
-DEFAULT_SYNAPSE_SQL_ADMIN_USERNAME="sqladmin"
+DEFAULT_POSTGRESQL_ADMIN_USERNAME="sqladmin"
 DEFAULT_VM_ADMIN_USERNAME="vmadmin"
 ARG_ACTION="${DEFAULT_ACTION}"
 ARG_CONFIGURATION_FILE="${DEFAULT_CONFIGURATION_FILE}"
@@ -1630,7 +1596,7 @@ if [ "${ARG_ACTION}" != "deploy-public-fabric" ] && \
    [ "${ARG_ACTION}" != "azure-login" ] && \
    [ "${ARG_ACTION}" != "deploy-public-datasource" ] && \
    [ "${ARG_ACTION}" != "deploy-private-fabric" ] && \
-   [ "${ARG_ACTION}" != "deploy-private-shir" ] && \
+   [ "${ARG_ACTION}" != "deploy-private-datagw" ] && \
    [ "${ARG_ACTION}" != "deploy-private-vnetir" ] && \
    [ "${ARG_ACTION}" != "scan-public-datasource" ] && \
    [ "${ARG_ACTION}" != "scan-private-datasource" ] && \
@@ -1723,8 +1689,16 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
 
     CLIENT_IP_ADDRESS=$(curl -s https://ifconfig.me)
     OBJECT_ID=$(getCurrentObjectId)
+    if [ -z "${OBJECT_ID}" ] || [ "${OBJECT_ID}" = "null" ]; then
+        printError "Cannot get current user Object Id"
+        exit 1
+    fi
     OBJECT_TYPE=$(getCurrentObjectType)
     PRINCIPAL_NAME=$(getCurrentUserPrincipalName)
+    if [ -z "${PRINCIPAL_NAME}" ] || [ "${PRINCIPAL_NAME}" = "null" ]; then
+        printError "Cannot get current user principal name"
+        exit 1
+    fi
     printProgress "Deploy public Fabric in resource group '${RESOURCE_GROUP_NAME}'"
     DEPLOY_NAME=$(date +"%y%m%d%H%M%S")
     cmd="az deployment group create --resource-group $RESOURCE_GROUP_NAME  --name ${DEPLOY_NAME}   \
@@ -1735,7 +1709,7 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
     visibility=${VISIBILITY} \
     suffix=${AZURE_SUFFIX} \
     objectId=\"${OBJECT_ID}\" objectType=\"${OBJECT_TYPE}\" principalName=\"${PRINCIPAL_NAME}\"   clientIpAddress=\"${CLIENT_IP_ADDRESS}\"  \
-    --mode Incremental --verbose"
+     --verbose"
     printProgress "$cmd"
     eval "$cmd"
     checkError
@@ -1765,7 +1739,9 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
         fi
         printProgress "Fabric workspace with name ${AZURE_FABRIC_WORKSPACE_NAME} and id ${WORKSPACE_ID} has identity ${WORKSPACE_IDENTITY}"
     fi
-
+    updateConfigurationFile "${CONFIGURATION_FILE}" AZURE_FABRIC_WORKSPACE_NAME "${AZURE_FABRIC_WORKSPACE_NAME}"
+    updateConfigurationFile "${CONFIGURATION_FILE}" AZURE_FABRIC_WORKSPACE_ID "${WORKSPACE_ID}"
+    updateConfigurationFile "${CONFIGURATION_FILE}" AZURE_FABRIC_WORKSPACE_PRINCIPAL_ID "${WORKSPACE_IDENTITY}"
     exit 0
 fi
 
@@ -1810,19 +1786,19 @@ if [ "${ACTION}" = "deploy-public-datasource" ] ; then
     OBJECT_ID=$(getCurrentObjectId)
     OBJECT_TYPE=$(getCurrentObjectType)
 
-    printProgress "Reading Synapse SQL Administrator login from Key Vault  ${AZURE_KEY_VAULT_NAME}"
+    printProgress "Reading SQL Administrator login from Key Vault  ${AZURE_KEY_VAULT_NAME}"
     POSTGRESQL_ADMIN_LOGIN=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME}")
     if [ -z "${POSTGRESQL_ADMIN_LOGIN}" ]; then
-        printProgress "Writing Synapse SQL Administrator login to Key Vault  ${AZURE_KEY_VAULT_NAME}"
-        POSTGRESQL_ADMIN_LOGIN="${DEFAULT_SYNAPSE_SQL_ADMIN_USERNAME}"
+        printProgress "Writing SQL Administrator login to Key Vault  ${AZURE_KEY_VAULT_NAME}"
+        POSTGRESQL_ADMIN_LOGIN="${DEFAULT_POSTGRESQL_ADMIN_USERNAME}"
         updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME}" "${POSTGRESQL_ADMIN_LOGIN}"
     else
-        printProgress "Using existing Synapse SQL Administrator login from Key Vault  ${AZURE_KEY_VAULT_NAME}"
+        printProgress "Using existing SQL Administrator login from Key Vault  ${AZURE_KEY_VAULT_NAME}"
     fi
-    printProgress "Reading Synapse SQL Administrator password from Key Vault  ${AZURE_KEY_VAULT_NAME}"
+    printProgress "Reading PostgreSQL Administrator password from Key Vault  ${AZURE_KEY_VAULT_NAME}"
     POSTGRESQL_ADMIN_PASSWORD=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_PASSWORD_SECRET_NAME}")
     if [ -z "${POSTGRESQL_ADMIN_PASSWORD}" ]; then
-        printProgress "Generating and storing Synapse SQL Administrator password in Key Vault  ${AZURE_KEY_VAULT_NAME}"
+        printProgress "Generating and storing PostgreSQL Administrator password in Key Vault  ${AZURE_KEY_VAULT_NAME}"
         POSTGRESQL_ADMIN_PASSWORD=$(tr -dc 'A-Za-z0-9!?%=' < /dev/urandom | head -c 12)$(tr -dc '[:upper:]' < /dev/urandom  | head -c1)$(tr -dc '[:lower:]' < /dev/urandom  | head -c1)$(tr -dc '0-9' < /dev/urandom  | head -c1)
         updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_PASSWORD_SECRET_NAME}" "${POSTGRESQL_ADMIN_PASSWORD}"
     fi
@@ -1840,7 +1816,7 @@ if [ "${ACTION}" = "deploy-public-datasource" ] ; then
     sqlAdministratorPassword=\"${POSTGRESQL_ADMIN_PASSWORD}\" \
     fabricPrincipalId=\"${AZURE_FABRIC_WORKSPACE_IDENTITY}\" \
     objectId=\"${OBJECT_ID}\"  objectType=\"${OBJECT_TYPE}\"  \
-    clientIpAddress=\"${CLIENT_IP_ADDRESS}\" --mode Incremental --verbose"
+    clientIpAddress=\"${CLIENT_IP_ADDRESS}\"  --verbose"
     printProgress "$cmd"
     eval "$cmd"
     checkError
@@ -1857,13 +1833,6 @@ if [ "${ACTION}" = "deploy-public-datasource" ] ; then
         installSqlcmd
     fi
     printProgress "Creating Product table 'Product' in PostgreSQL  database '$AZURE_POSTGRESQL_NAME'"
-    # cmd="sqlcmd -S \"$AZURE_POSTGRESQL_NAME.postgres.database.azure.com\" \
-    #     -U \"$POSTGRESQL_ADMIN_LOGIN\" \
-    #     -P \"$POSTGRESQL_ADMIN_PASSWORD\" \
-    #     -d \"$AZURE_POSTGRESQL_NAME\" \
-    #     -C \
-    #     -I \
-    #     -i $SCRIPTS_DIRECTORY/data/products/setup.sql"
     POSTGRESQL_DATABASE="products"
     cmd="PGPASSWORD=$POSTGRESQL_ADMIN_PASSWORD  \
         psql \
@@ -1911,8 +1880,16 @@ if [ "${ACTION}" = "deploy-private-fabric" ] ; then
     printProgress "Deploy private Fabric in resource group '${RESOURCE_GROUP_NAME}'"
 
     OBJECT_ID=$(getCurrentObjectId)
+    if [ -z "${OBJECT_ID}" ] || [ "${OBJECT_ID}" = "null" ]; then
+        printError "Cannot get current user Object Id"
+        exit 1
+    fi    
     OBJECT_TYPE=$(getCurrentObjectType)
-
+    PRINCIPAL_NAME=$(getCurrentUserPrincipalName)
+    if [ -z "${PRINCIPAL_NAME}" ] || [ "${PRINCIPAL_NAME}" = "null" ]; then
+        printError "Cannot get current user principal name"
+        exit 1
+    fi    
     DEPLOY_NAME=$(date +"%y%m%d%H%M%S")
     cmd="az deployment group create --resource-group $RESOURCE_GROUP_NAME --name ${DEPLOY_NAME} \
     --template-file $SCRIPTS_DIRECTORY/bicep/private-main.bicep \
@@ -1924,25 +1901,52 @@ if [ "${ACTION}" = "deploy-private-fabric" ] ; then
     vnetAddressPrefix=\"10.13.0.0/16\" \
     privateEndpointSubnetAddressPrefix=\"10.13.0.0/24\" \
     bastionSubnetAddressPrefix=\"10.13.1.0/24\" \
-    shirSubnetAddressPrefix=\"10.13.2.0/24\" \
+    datagwSubnetAddressPrefix=\"10.13.2.0/24\" \
     gatewaySubnetAddressPrefix=\"10.13.3.0/24\" \
     dnsDelegationSubnetAddressPrefix=\"10.13.4.0/24\" \
     dnsDelegationSubnetIPAddress=\"10.13.4.22\" \
     dnsZoneResourceGroupName=\"${RESOURCE_GROUP_NAME}\" \
     dnsZoneSubscriptionId=\"${AZURE_SUBSCRIPTION_ID}\" \
     newOrExistingDnsZones=\"new\" \
-    objectId=\"${OBJECT_ID}\"  objectType=\"${OBJECT_TYPE}\"  \
-    --mode Incremental --verbose"
+    objectId=\"${OBJECT_ID}\"  objectType=\"${OBJECT_TYPE}\" principalName=\"${PRINCIPAL_NAME}\"  \
+     --verbose"
     printProgress "$cmd"
     eval "$cmd"
     checkError
 
-    purviewPrincipalId=$(az deployment group show --resource-group "$RESOURCE_GROUP_NAME" -n "${DEPLOY_NAME}" --query "properties.outputs" | jq -r '.outPurviewPrincipalId.value')
-    updateConfigurationFile "${CONFIGURATION_FILE}" FABRIC_PRINCIPAL_ID "${purviewPrincipalId}"
+    if [ -n "${AZURE_FABRIC_WORKSPACE_NAME}" ]; then
+        WORKSPACE_ID=$(getFabricWorkspaceId "${AZURE_FABRIC_WORKSPACE_NAME}")
+        if [ -z "${WORKSPACE_ID}" ]; then
+            printProgress "Creating Fabric workspace with name ${AZURE_FABRIC_WORKSPACE_NAME}"
+            createFabricWorkspace "${AZURE_FABRIC_WORKSPACE_NAME}"
+            WORKSPACE_ID=$(getFabricWorkspaceId "${AZURE_FABRIC_WORKSPACE_NAME}")
+        fi
+        if [ -z "${WORKSPACE_ID}" ]; then
+            printError "Cannot get Fabric workspace ID for workspace name ${AZURE_FABRIC_WORKSPACE_NAME}"
+            exit 1
+        fi
+        printProgress "Fabric workspace with name ${AZURE_FABRIC_WORKSPACE_NAME} id is ${WORKSPACE_ID}"
+        WORKSPACE_IDENTITY=$(getFabricWorkspaceIdentity "${WORKSPACE_ID}")
+        if [ -z "${WORKSPACE_IDENTITY}" ] || [ "${WORKSPACE_IDENTITY}" = "null" ]; then
+            printProgress "Creating Fabric workspace identity for workspace name ${AZURE_FABRIC_WORKSPACE_NAME}"
+            createFabricWorkspaceIdentity "${WORKSPACE_ID}"
+            sleep 10
+            WORKSPACE_IDENTITY=$(getFabricWorkspaceIdentity "${WORKSPACE_ID}")
+        fi
+        if [ -z "${WORKSPACE_IDENTITY}" ] || [ "${WORKSPACE_IDENTITY}" = "null" ]; then
+            printError "Cannot get Fabric workspace identity for workspace name ${AZURE_FABRIC_WORKSPACE_NAME}"
+            exit 1
+        fi
+        printProgress "Fabric workspace with name ${AZURE_FABRIC_WORKSPACE_NAME} and id ${WORKSPACE_ID} has identity ${WORKSPACE_IDENTITY}"
+    fi
+
+    updateConfigurationFile "${CONFIGURATION_FILE}" AZURE_FABRIC_WORKSPACE_NAME "${AZURE_FABRIC_WORKSPACE_NAME}"
+    updateConfigurationFile "${CONFIGURATION_FILE}" AZURE_FABRIC_WORKSPACE_ID "${WORKSPACE_ID}"
+    updateConfigurationFile "${CONFIGURATION_FILE}" AZURE_FABRIC_WORKSPACE_PRINCIPAL_ID "${WORKSPACE_IDENTITY}"
     exit 0
 fi
 
-if [ "${ACTION}" = "deploy-private-shir" ] ; then
+if [ "${ACTION}" = "deploy-private-datagw" ] ; then
     printProgress "Checking whether the Azure CLI providers and extensions are installed..."
     installPreRequisites
     VISIBILITY="pri"
@@ -1953,61 +1957,61 @@ if [ "${ACTION}" = "deploy-private-shir" ] ; then
     fi
     setAzureResourceNames ${AZURE_ENVIRONMENT} "${VISIBILITY}" "${AZURE_SUFFIX}" "${RESOURCE_GROUP_NAME}"
 
-    PURVIEW_SHIR_VM_SKU_NAME="Standard_B2ms"
-    PURVIEW_SHIR_VM_SKU_TIER="Standard"
-    PURVIEW_SHIR_VM_SKU_CAPACITY=1
-    PURVIEW_SHIR_VM_ADMIN_USERNAME="${DEFAULT_VM_ADMIN_USERNAME}"
-    PURVIEW_SHIR_VM_ADMIN_PASSWORD=""
+    PURVIEW_DATAGW_VM_SKU_NAME="Standard_B2ms"
+    PURVIEW_DATAGW_VM_SKU_TIER="Standard"
+    PURVIEW_DATAGW_VM_SKU_CAPACITY=1
+    PURVIEW_DATAGW_VM_ADMIN_USERNAME="${DEFAULT_VM_ADMIN_USERNAME}"
+    PURVIEW_DATAGW_VM_ADMIN_PASSWORD=""
 
-    printProgress "Checking whether the Fabric SHIR exists"
-    RESULT=$(isPurviewAPIAvailable "${AZURE_PURVIEW_ACCOUNT_NAME}")
+    printProgress "Checking whether the Fabric DATAGW exists"
+    RESULT=$(isFabricAPIAvailable "${AZURE_FABRIC_ACCOUNT_NAME}")
     if [ "$RESULT" = "false" ]; then
-        printError "Fabric API is not available, please check whether the Fabric account '${AZURE_PURVIEW_ACCOUNT_NAME}' exists and is in 'Succeeded' state. Check also the VPN connection"
+        printError "Fabric API is not available, please check whether the Fabric account '${AZURE_FABRIC_ACCOUNT_NAME}' exists and is in 'Succeeded' state. Check also the VPN connection"
         exit 1
     fi
-    RESULT=$(doesPurviewSHIRExist ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_SHIR_NAME})
+    RESULT=$(doesFabricDATAGWExist ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATAGW_NAME})
     if [ "$RESULT" = "false" ]; then
-        printProgress "Creating the Fabric SHIR"
-        createPurviewSHIR ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_SHIR_NAME}
+        printProgress "Creating the Fabric DATAGW"
+        createFabricDATAGW ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATAGW_NAME}
         if [ $? -ne 0 ]; then
-            printError "Failed to create Fabric SHIR"
+            printError "Failed to create Fabric DATAGW"
             exit 1
         fi
     else
-        printProgress "The Fabric SHIR already exists"
+        printProgress "The Fabric DATAGW already exists"
     fi
-    PURVIEW_SHIR_KEY=$(getPurviewSHIRKey ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_SHIR_NAME})
-    if [ -z "$PURVIEW_SHIR_KEY" ]; then
-        printError "Cannot get Fabric SHIR Key"
+    PURVIEW_DATAGW_KEY=$(getFabricDATAGWKey ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATAGW_NAME})
+    if [ -z "$PURVIEW_DATAGW_KEY" ]; then
+        printError "Cannot get Fabric DATAGW Key"
         exit 1
     fi
-    printProgress "Fabric SHIR Key: ${PURVIEW_SHIR_KEY}"
+    printProgress "Fabric DATAGW Key: ${PURVIEW_DATAGW_KEY}"
 
-    printProgress "Storing Fabric SHIR Key in Key Vault  ${AZURE_KEY_VAULT_NAME}"
-    updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_PURVIEW_SHIR_KEY_SECRET_NAME}" "${PURVIEW_SHIR_KEY}"
-    PURVIEW_SHIR_VM_ADMIN_PASSWORD=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_PURVIEW_SHIR_VM_PASSWORD_SECRET_NAME}")
-    if [ -z "${PURVIEW_SHIR_VM_ADMIN_PASSWORD}" ]; then
+    printProgress "Storing Fabric DATAGW Key in Key Vault  ${AZURE_KEY_VAULT_NAME}"
+    updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_PURVIEW_DATAGW_KEY_SECRET_NAME}" "${PURVIEW_DATAGW_KEY}"
+    PURVIEW_DATAGW_VM_ADMIN_PASSWORD=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_PURVIEW_DATAGW_VM_PASSWORD_SECRET_NAME}")
+    if [ -z "${PURVIEW_DATAGW_VM_ADMIN_PASSWORD}" ]; then
         printProgress "Generating and storing Virtual Machine password in Key Vault  ${AZURE_KEY_VAULT_NAME}"
-        PURVIEW_SHIR_VM_ADMIN_PASSWORD=$(tr -dc 'A-Za-z0-9!?%=' < /dev/urandom | head -c 12)$(tr -dc '[:upper:]' < /dev/urandom  | head -c1)$(tr -dc '[:lower:]' < /dev/urandom  | head -c1)$(tr -dc '0-9' < /dev/urandom  | head -c1)
-        updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_PURVIEW_SHIR_VM_PASSWORD_SECRET_NAME}" "${PURVIEW_SHIR_VM_ADMIN_PASSWORD}"
-        updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_PURVIEW_SHIR_VM_LOGIN_SECRET_NAME}" "${PURVIEW_SHIR_VM_ADMIN_USERNAME}"
+        PURVIEW_DATAGW_VM_ADMIN_PASSWORD=$(tr -dc 'A-Za-z0-9!?%=' < /dev/urandom | head -c 12)$(tr -dc '[:upper:]' < /dev/urandom  | head -c1)$(tr -dc '[:lower:]' < /dev/urandom  | head -c1)$(tr -dc '0-9' < /dev/urandom  | head -c1)
+        updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_PURVIEW_DATAGW_VM_PASSWORD_SECRET_NAME}" "${PURVIEW_DATAGW_VM_ADMIN_PASSWORD}"
+        updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_PURVIEW_DATAGW_VM_LOGIN_SECRET_NAME}" "${PURVIEW_DATAGW_VM_ADMIN_USERNAME}"
     fi
-    printProgress "Deploy Fabric Virtual Machine running SHIR in resource group '${RESOURCE_GROUP_NAME}'"
+    printProgress "Deploy Fabric Virtual Machine running DATAGW in resource group '${RESOURCE_GROUP_NAME}'"
     DEPLOY_NAME=$(date +"%y%m%d%H%M%S")
     cmd="az deployment group create --resource-group $RESOURCE_GROUP_NAME --name ${DEPLOY_NAME} \
-    --template-file $SCRIPTS_DIRECTORY/bicep/private-shir.bicep \
+    --template-file $SCRIPTS_DIRECTORY/bicep/private-datagw.bicep \
     --parameters \
     location=${AZURE_REGION} \
     env=${AZURE_ENVIRONMENT} \
     visibility=${VISIBILITY} \
     suffix=${AZURE_SUFFIX} \
-    vmssSkuName=${PURVIEW_SHIR_VM_SKU_NAME} \
-    vmssSkuTier=${PURVIEW_SHIR_VM_SKU_TIER} \
-    vmssSkuCapacity=${PURVIEW_SHIR_VM_SKU_CAPACITY} \
-    administratorUsername=${PURVIEW_SHIR_VM_ADMIN_USERNAME} \
-    administratorPassword=${PURVIEW_SHIR_VM_ADMIN_PASSWORD} \
-    purviewIntegrationRuntimeAuthKey=${PURVIEW_SHIR_KEY} \
-    --mode Incremental --verbose"
+    vmssSkuName=${PURVIEW_DATAGW_VM_SKU_NAME} \
+    vmssSkuTier=${PURVIEW_DATAGW_VM_SKU_TIER} \
+    vmssSkuCapacity=${PURVIEW_DATAGW_VM_SKU_CAPACITY} \
+    administratorUsername=${PURVIEW_DATAGW_VM_ADMIN_USERNAME} \
+    administratorPassword=${PURVIEW_DATAGW_VM_ADMIN_PASSWORD} \
+    purviewIntegrationRuntimeAuthKey=${PURVIEW_DATAGW_KEY} \
+     --verbose"
     printProgress "$cmd"
     eval "$cmd"
     checkError
@@ -2027,15 +2031,15 @@ if [ "${ACTION}" = "deploy-private-vnetir" ] ; then
 
 
     printProgress "Checking whether the Fabric VNET IR exists"
-    RESULT=$(isPurviewAPIAvailable "${AZURE_PURVIEW_ACCOUNT_NAME}")
+    RESULT=$(isFabricAPIAvailable "${AZURE_FABRIC_ACCOUNT_NAME}")
     if [ "$RESULT" = "false" ]; then
-        printError "Fabric API is not available, please check whether the Fabric account '${AZURE_PURVIEW_ACCOUNT_NAME}' exists and is in 'Succeeded' state. Check also the VPN connection"
+        printError "Fabric API is not available, please check whether the Fabric account '${AZURE_FABRIC_ACCOUNT_NAME}' exists and is in 'Succeeded' state. Check also the VPN connection"
         exit 1
     fi
-    RESULT=$(doesPurviewManagedVNETExist ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME}  ${AZURE_PURVIEW_MANAGED_VNET_NAME})
+    RESULT=$(doesFabricManagedVNETExist ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME}  ${AZURE_PURVIEW_MANAGED_VNET_NAME})
     if [ "$RESULT" = "false" ]; then
         printProgress "Creating the Fabric Managed VNET..."
-        createPurviewManagedVNET ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME} ${AZURE_REGION} ${AZURE_PURVIEW_MANAGED_VNET_NAME}
+        createFabricManagedVNET ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME} ${AZURE_REGION} ${AZURE_PURVIEW_MANAGED_VNET_NAME}
         printProgress "Wait 5 minutes for the Fabric Managed VNET creation..."
         CREATION_TEST="false"
         COUNTER=1
@@ -2043,7 +2047,7 @@ if [ "${ACTION}" = "deploy-private-vnetir" ] ; then
         while [ "${CREATION_TEST}" = "false" ] && [ $COUNTER -le $MAX ]
         do
             sleep 30
-            CREATION_TEST=$(doesPurviewManagedVNETExist ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME}  ${AZURE_PURVIEW_MANAGED_VNET_NAME})
+            CREATION_TEST=$(doesFabricManagedVNETExist ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME}  ${AZURE_PURVIEW_MANAGED_VNET_NAME})
             COUNTER=$((COUNTER + 1))
         done
         if [ "${CREATION_TEST}" = "false" ]; then
@@ -2052,23 +2056,23 @@ if [ "${ACTION}" = "deploy-private-vnetir" ] ; then
         fi
     fi
 
-    RESULT=$(doesPurviewVNETIRExist ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME})
+    RESULT=$(doesFabricVNETIRExist ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME})
     if [ "$RESULT" = "false" ]; then
         printProgress "Creating the Fabric VNET IR"
-        createPurviewVNETIR ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME} ${AZURE_REGION}  ${AZURE_PURVIEW_MANAGED_VNET_NAME}
+        createFabricVNETIR ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME} ${AZURE_REGION}  ${AZURE_PURVIEW_MANAGED_VNET_NAME}
         if [ $? -ne 0 ]; then
             printError "Failed to create Fabric VNET IR"
             exit 1
         fi
     else
-        printProgress "The Fabric SHIR already exists"
+        printProgress "The Fabric DATAGW already exists"
     fi
-    createPurviewVNETIRPrivateEndpoints ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME} ${AZURE_REGION} ${AZURE_PURVIEW_MANAGED_VNET_NAME}
+    createFabricVNETIRPrivateEndpoints ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME} ${AZURE_REGION} ${AZURE_PURVIEW_MANAGED_VNET_NAME}
     if [ $? -ne 0 ]; then
         printError "Failed to create Fabric VNET IR endpoints"
         exit 1
     fi
-    approvePurviewVNETIRPrivateEndpoints ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME} ${AZURE_REGION}
+    approveFabricVNETIRPrivateEndpoints ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_VNETIR_NAME} ${AZURE_REGION}
     exit 0
 fi
 
@@ -2091,25 +2095,37 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
         printProgress "Resource group '${RESOURCE_GROUP_NAME}' already exists"
     fi
     setAzureResourceNames ${AZURE_ENVIRONMENT} "${VISIBILITY}" "${AZURE_SUFFIX}" "${RESOURCE_GROUP_NAME}"
-
-    if [ -z "${FABRIC_PRINCIPAL_ID+x}" ] ; then
-        FABRIC_RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}""${AZURE_SUFFIX}")
-        FABRIC_PRINCIPAL_ID=$(az fabric account show -n ${AZURE_PURVIEW_ACCOUNT_NAME} -g ${FABRIC_RESOURCE_GROUP_NAME} --query identity.principalId -o tsv)
+    if [ -z "${AZURE_FABRIC_WORKSPACE_IDENTITY+x}" ] ; then
+        if [ -n "${AZURE_FABRIC_WORKSPACE_NAME}" ]; then
+            AZURE_FABRIC_WORKSPACE_ID=$(getFabricWorkspaceId "${AZURE_FABRIC_WORKSPACE_NAME}")
+            if [ -z "${AZURE_FABRIC_WORKSPACE_ID}" ]; then
+                printError "Cannot get Fabric workspace ID for workspace name ${AZURE_FABRIC_WORKSPACE_NAME}"
+                exit 1
+            fi
+            printProgress "Fabric workspace with name ${AZURE_FABRIC_WORKSPACE_NAME} id is ${AZURE_FABRIC_WORKSPACE_ID}"
+            AZURE_FABRIC_WORKSPACE_IDENTITY=$(getFabricWorkspaceIdentity "${AZURE_FABRIC_WORKSPACE_ID}")
+            if [ -z "${AZURE_FABRIC_WORKSPACE_IDENTITY}" ] || [ "${AZURE_FABRIC_WORKSPACE_IDENTITY}" = "null" ]; then
+                printError "Cannot get Fabric workspace identity for workspace name ${AZURE_FABRIC_WORKSPACE_NAME}"
+                exit 1
+            fi
+            printProgress "Fabric workspace with name ${AZURE_FABRIC_WORKSPACE_NAME} and id ${AZURE_FABRIC_WORKSPACE_ID} has identity ${AZURE_FABRIC_WORKSPACE_IDENTITY}"
+        fi
     fi
+
     CLIENT_IP_ADDRESS=$(curl -s https://ifconfig.me)
     OBJECT_ID=$(getCurrentObjectId)
     OBJECT_TYPE=$(getCurrentObjectType)
 
     POSTGRESQL_ADMIN_LOGIN=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME}")
     if [ -z "${POSTGRESQL_ADMIN_LOGIN}" ]; then
-        POSTGRESQL_ADMIN_LOGIN="${DEFAULT_SYNAPSE_SQL_ADMIN_USERNAME}"
+        POSTGRESQL_ADMIN_LOGIN="${DEFAULT_POSTGRESQL_ADMIN_USERNAME}"
         updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_LOGIN_SECRET_NAME}" "${POSTGRESQL_ADMIN_LOGIN}"
     else
-        printProgress "Using existing Synapse SQL Administrator login from Key Vault  ${AZURE_KEY_VAULT_NAME}"
+        printProgress "Using existing PostgreSQL SQL Administrator login from Key Vault  ${AZURE_KEY_VAULT_NAME}"
     fi
     POSTGRESQL_ADMIN_PASSWORD=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_PASSWORD_SECRET_NAME}")
     if [ -z "${POSTGRESQL_ADMIN_PASSWORD}" ]; then
-        printProgress "Generating and storing Synapse SQL Administrator password in Key Vault  ${AZURE_KEY_VAULT_NAME}"
+        printProgress "Generating and storing PostgreSQL SQL Administrator password in Key Vault  ${AZURE_KEY_VAULT_NAME}"
         POSTGRESQL_ADMIN_PASSWORD=$(tr -dc 'A-Za-z0-9!?%=' < /dev/urandom | head -c 12)$(tr -dc '[:upper:]' < /dev/urandom  | head -c1)$(tr -dc '[:lower:]' < /dev/urandom  | head -c1)$(tr -dc '0-9' < /dev/urandom  | head -c1)
         updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_POSTGRESQL_ADMINISTRATOR_PASSWORD_SECRET_NAME}" "${POSTGRESQL_ADMIN_PASSWORD}"
     fi
@@ -2129,9 +2145,9 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
     dnsZoneResourceGroupName=\"${FABRIC_RESOURCE_GROUP_NAME}\" \
     sqlAdministratorLogin=\"${POSTGRESQL_ADMIN_LOGIN}\" \
     sqlAdministratorPassword=\"${POSTGRESQL_ADMIN_PASSWORD}\" \
-    purviewPrincipalId=\"${FABRIC_PRINCIPAL_ID}\" \
+    fabricPrincipalId=\"${AZURE_FABRIC_WORKSPACE_IDENTITY}\" \
     objectId=\"${OBJECT_ID}\"  objectType=\"${OBJECT_TYPE}\"  \
-    clientIpAddress=\"${CLIENT_IP_ADDRESS}\" --mode Incremental --verbose"
+    clientIpAddress=\"${CLIENT_IP_ADDRESS}\"  --verbose"
     printProgress "$cmd"
     eval "$cmd"
     checkError
@@ -2188,45 +2204,35 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
     eval "$cmd" >/dev/null
     sleep 30
 
-    SQLCMD_PATH=$(command -v sqlcmd 2>/dev/null)
-    printProgress "Checking if sqlcmd is installed"
-    if [ ! -n "$SQLCMD_PATH" ]; then
-        printProgress "Installing sqlcmd"
-        installSqlcmd
-    fi
-    printProgress "Creating Product table 'Product' in Synapse SQL Pool database '$AZURE_SYNAPSE_SQL_POOL_NAME'"
-    cmd="sqlcmd -S \"$AZURE_SYNAPSE_WORKSPACE_NAME.sql.azuresynapse.net\" \
-        -U \"$POSTGRESQL_ADMIN_LOGIN\" \
-        -P \"$POSTGRESQL_ADMIN_PASSWORD\" \
-        -d \"$AZURE_SYNAPSE_SQL_POOL_NAME\" \
-        -C \
-        -I \
-        -i $SCRIPTS_DIRECTORY/data/products/setup.sql"
+    printProgress "Creating Product table 'Product' in PostgreSQL  database '$AZURE_POSTGRESQL_NAME'"
+    POSTGRESQL_DATABASE="products"
+    cmd="PGPASSWORD=$POSTGRESQL_ADMIN_PASSWORD  \
+        psql \
+            -h \"$AZURE_POSTGRESQL_NAME.postgres.database.azure.com\" \
+            -U \"$POSTGRESQL_ADMIN_LOGIN\" \
+            -d \"postgres\" \
+            -c \"CREATE DATABASE $POSTGRESQL_DATABASE;\""
+    #printProgress "$cmd"
+    eval "$cmd"
+
+    cmd="PGPASSWORD=$POSTGRESQL_ADMIN_PASSWORD  \
+            psql \
+            -h \"$AZURE_POSTGRESQL_NAME.postgres.database.azure.com\" \
+            -U \"$POSTGRESQL_ADMIN_LOGIN\" \
+            -d \"$POSTGRESQL_DATABASE\" \
+            -v ON_ERROR_STOP=1 \
+            -f \"$SCRIPTS_DIRECTORY/data/products/setup.sql\""
+    
+    #printProgress "$cmd"
     eval "$cmd"
 
 
-    AZURE_PURVIEW_ACCOUNT_NAME=$(echo ${RESULT}  | jq -r '.purviewAccountName.value' 2>/dev/null)
-    AZURE_STORAGE_ACCOUNT_NAME=$(echo ${RESULT}  | jq -r '.storageAccountName.value' 2>/dev/null)
-    AZURE_KEY_VAULT_NAME=$(echo ${RESULT}  | jq -r '.keyVaultName.value' 2>/dev/null)
-    AZURE_PURVIEW_MANAGED_VNET_NAME=$(echo ${RESULT}  | jq -r '.purviewManagedVnetName.value' 2>/dev/null)
-    AZURE_SYNAPSE_WORKSPACE_NAME=$(echo ${RESULT}  | jq -r '.synapseWorkspaceName.value' 2>/dev/null)
-    AZURE_SYNAPSE_STORAGE_ACCOUNT_NAME=$(echo ${RESULT}  | jq -r '.synapseStorageAccountName.value' 2>/dev/null)
     
-    AZURE_RESOURCE_GROUP_PURVIEW_NAME=$(echo ${RESULT}  | jq -r '.resourceGroupFabricName.value' 2>/dev/null)
-    AZURE_RESOURCE_GROUP_DATASOURCE_NAME=$(echo ${RESULT}  | jq -r '.resourceGroupDatasourceName.value' 2>/dev/null)
-
-    printProgress "Creating Managed Private Endpoints for Fabric ${AZURE_PURVIEW_ACCOUNT_NAME}"
-    createPurviewStorageManagedPrivateEndpoints "${AZURE_PURVIEW_ACCOUNT_NAME}" "${AZURE_RESOURCE_GROUP_DATASOURCE_NAME}" "${AZURE_STORAGE_ACCOUNT_NAME}" "${AZURE_PURVIEW_MANAGED_VNET_NAME}" "blob"
-    createPurviewStorageManagedPrivateEndpoints "${AZURE_PURVIEW_ACCOUNT_NAME}" "${AZURE_RESOURCE_GROUP_DATASOURCE_NAME}" "${AZURE_SYNAPSE_STORAGE_ACCOUNT_NAME}" "${AZURE_PURVIEW_MANAGED_VNET_NAME}" "blob"
-    createPurviewSynapseManagedPrivateEndpoints "${AZURE_PURVIEW_ACCOUNT_NAME}" "${AZURE_RESOURCE_GROUP_DATASOURCE_NAME}" "${AZURE_SYNAPSE_WORKSPACE_NAME}" "${AZURE_PURVIEW_MANAGED_VNET_NAME}" "dev"
-    createPurviewSynapseManagedPrivateEndpoints "${AZURE_PURVIEW_ACCOUNT_NAME}" "${AZURE_RESOURCE_GROUP_DATASOURCE_NAME}" "${AZURE_SYNAPSE_WORKSPACE_NAME}" "${AZURE_PURVIEW_MANAGED_VNET_NAME}" "sql"
-    createPurviewSynapseManagedPrivateEndpoints "${AZURE_PURVIEW_ACCOUNT_NAME}" "${AZURE_RESOURCE_GROUP_DATASOURCE_NAME}" "${AZURE_SYNAPSE_WORKSPACE_NAME}" "${AZURE_PURVIEW_MANAGED_VNET_NAME}" "sqlOnDemand"
-    
-    printProgress "Creating Managed Private Endpoints for Synapse ${AZURE_SYNAPSE_WORKSPACE_NAME}"
-    createSynapseKeyVaultManagedPrivateEndpoints "${AZURE_SYNAPSE_WORKSPACE_NAME}" "${AZURE_RESOURCE_GROUP_PURVIEW_NAME}" "${AZURE_KEY_VAULT_NAME}"
-    createSynapsePurviewManagedPrivateEndpoints "${AZURE_SYNAPSE_WORKSPACE_NAME}" "${AZURE_RESOURCE_GROUP_PURVIEW_NAME}" "${AZURE_PURVIEW_ACCOUNT_NAME}"
-    
-
+    printProgress "Creating Managed Private Endpoints for Fabric Workspace ${AZURE_FABRIC_WORKSPACE_NAME}"
+    createFabricKeyVaultManagedPrivateEndpoints "${AZURE_FABRIC_WORKSPACE_NAME}" "${AZURE_RESOURCE_GROUP_FABRIC_NAME}" "${AZURE_KEY_VAULT_NAME}"
+    createFabricStorageManagedPrivateEndpoints "${AZURE_FABRIC_WORKSPACE_NAME}" "${AZURE_RESOURCE_GROUP_DATASOURCE_NAME}" "${AZURE_STORAGE_ACCOUNT_NAME}" 
+    createFabricPostgreSQLManagedPrivateEndpoints "${AZURE_FABRIC_WORKSPACE_NAME}" "${AZURE_RESOURCE_GROUP_DATASOURCE_NAME}" "${AZURE_POSTGRESQL_NAME}"
+    createFabricCosmosDBManagedPrivateEndpoints "${AZURE_FABRIC_WORKSPACE_NAME}" "${AZURE_RESOURCE_GROUP_DATASOURCE_NAME}" "${AZURE_COSMOSDB_ACCOUNT_NAME}"
     
     exit 0
 fi
@@ -2245,28 +2251,28 @@ if [ "${ACTION}" = "scan-private-datasource" ] ; then
 
 
     printProgress "Checking whether the Fabric API is accessible..."
-    RESULT=$(isPurviewAPIAvailable "${AZURE_PURVIEW_ACCOUNT_NAME}")
+    RESULT=$(isFabricAPIAvailable "${AZURE_FABRIC_ACCOUNT_NAME}")
     if [ "$RESULT" = "false" ]; then
-        printError "Fabric API is not available, please check whether the Fabric account '${AZURE_PURVIEW_ACCOUNT_NAME}' exists and is in 'Succeeded' state. Check also the VPN connection"
+        printError "Fabric API is not available, please check whether the Fabric account '${AZURE_FABRIC_ACCOUNT_NAME}' exists and is in 'Succeeded' state. Check also the VPN connection"
         exit 1
     fi
-    printProgress "Checking whether the Fabric collection '${AZURE_PURVIEW_ACCOUNT_NAME}' exists..."
-    RESULT=$(doesCollectionExist ${AZURE_PURVIEW_ACCOUNT_NAME})
+    printProgress "Checking whether the Fabric collection '${AZURE_FABRIC_ACCOUNT_NAME}' exists..."
+    RESULT=$(doesCollectionExist ${AZURE_FABRIC_ACCOUNT_NAME})
     if [ "$RESULT" = "false" ]; then
-        printProgress "Creating the collection '${AZURE_PURVIEW_ACCOUNT_NAME}'..."
-        createCollection ${AZURE_PURVIEW_ACCOUNT_NAME}
+        printProgress "Creating the collection '${AZURE_FABRIC_ACCOUNT_NAME}'..."
+        createCollection ${AZURE_FABRIC_ACCOUNT_NAME}
         exit 1
     fi
 
     printProgress "Checking whether the Fabric datasource '${AZURE_PURVIEW_DATASOURCE_NAME}' exists..."
-    RESULT=$(doesDatasourceExist ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME})
+    RESULT=$(doesDatasourceExist ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME})
     if [ "$RESULT" = "false" ]; then
         printProgress "Creating the Datasource '${AZURE_PURVIEW_DATASOURCE_NAME}'..."
         STORAGE_SUBSCRIPTION_ID="$AZURE_SUBSCRIPTION_ID"
         STORAGE_RESOURCE_GROUP_NAME=$(getDatasourceResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
 
         STORAGE_LOCATION=${AZURE_REGION}
-        createDatasource ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_COLLECTION_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${STORAGE_SUBSCRIPTION_ID} ${STORAGE_RESOURCE_GROUP_NAME} ${AZURE_STORAGE_ACCOUNT_NAME} ${STORAGE_LOCATION}
+        createDatasource ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_COLLECTION_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${STORAGE_SUBSCRIPTION_ID} ${STORAGE_RESOURCE_GROUP_NAME} ${AZURE_STORAGE_ACCOUNT_NAME} ${STORAGE_LOCATION}
         if [ $? -ne 0 ]; then
             printError "Failed to create the Datasource '${AZURE_PURVIEW_DATASOURCE_NAME}'"
             exit 1
@@ -2274,10 +2280,10 @@ if [ "${ACTION}" = "scan-private-datasource" ] ; then
     fi
 
     printProgress "Checking whether the Scan Rule Set  '${AZURE_PURVIEW_SCAN_RULE_SETS_NAME}' exists..."
-    RESULT=$(doesScanRuleSetExist ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_SCAN_RULE_SETS_NAME})
+    RESULT=$(doesScanRuleSetExist ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_SCAN_RULE_SETS_NAME})
     if [ "$RESULT" = "false" ]; then
         printProgress "Creating the Scan Rule Set '${AZURE_PURVIEW_SCAN_RULE_SETS_NAME}'..."
-        createScanRuleSet ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_SCAN_RULE_SETS_NAME}
+        createScanRuleSet ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_SCAN_RULE_SETS_NAME}
         if [ $? -ne 0 ]; then
             printError "Failed to create the Scan Rule Set '${AZURE_PURVIEW_SCAN_RULE_SETS_NAME}'"
             exit 1
@@ -2285,19 +2291,19 @@ if [ "${ACTION}" = "scan-private-datasource" ] ; then
     fi
 
 
-    SHIR_TYPE="Managed"
+    DATAGW_TYPE="Managed"
     printProgress "Checking whether the Scan '${AZURE_PURVIEW_SCAN_NAME}' exists..."
-    RESULT=$(doesScanExist ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME})
+    RESULT=$(doesScanExist ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME})
     if [ "$RESULT" = "false" ]; then
         printProgress "Creating the Scan '${AZURE_PURVIEW_SCAN_NAME}'..."
-        createPrivateScan ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${AZURE_PURVIEW_COLLECTION_NAME} ${AZURE_PURVIEW_SCAN_RULE_SETS_NAME} ${AZURE_PURVIEW_VNETIR_NAME} ${SHIR_TYPE} ${AZURE_PURVIEW_MANAGED_VNET_NAME}
+        createPrivateScan ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${AZURE_PURVIEW_COLLECTION_NAME} ${AZURE_PURVIEW_SCAN_RULE_SETS_NAME} ${AZURE_PURVIEW_VNETIR_NAME} ${DATAGW_TYPE} ${AZURE_PURVIEW_MANAGED_VNET_NAME}
         if [ $? -ne 0 ]; then
             printError "Failed to create the Scan '${AZURE_PURVIEW_SCAN_NAME}'"
             exit 1
         fi
     fi
     printProgress "Triggering the scan '${AZURE_PURVIEW_SCAN_NAME}'..."
-    SCAN_ID=$(triggerScan  ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME})
+    SCAN_ID=$(triggerScan  ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME})
     if [ $? -ne 0 ]; then
         printError "Cannot trigger the Scan  '${AZURE_PURVIEW_SCAN_NAME}'"
         exit 1
@@ -2314,15 +2320,15 @@ if [ "${ACTION}" = "scan-private-datasource" ] ; then
     while [ -z "${STATUS}" ] || [ "${STATUS}" = "Accepted" ]  || [ "${STATUS}" = "InProgress" ] || [ "${STATUS}" = "Queued" ] && [ $COUNTER -le $MAX ]
     do
         sleep 30
-        STATUS=$(getScanStatus ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${SCAN_ID})
+        STATUS=$(getScanStatus ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${SCAN_ID})
         printProgress "Scan Id: ${SCAN_ID} Status: $STATUS"
         COUNTER=$((COUNTER + 1))
     done
     if [ "${STATUS}" = "Succeeded" ]; then
-        STAT=$(getScanStatistics ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${SCAN_ID})
+        STAT=$(getScanStatistics ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${SCAN_ID})
         printProgress "Assets: $STAT"
     else
-        ERROR=$(getScanError ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${SCAN_ID})
+        ERROR=$(getScanError ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${SCAN_ID})
         if [ -z "$ERROR" ]; then
             printError "Scan didn't succeeded, please check the Fabric Studio"
         else
@@ -2347,28 +2353,28 @@ if [ "${ACTION}" = "scan-public-datasource" ] ; then
 
 
     printProgress "Checking whether the Fabric API is accessible..."
-    RESULT=$(isPurviewAPIAvailable "${AZURE_PURVIEW_ACCOUNT_NAME}")
+    RESULT=$(isFabricAPIAvailable "${AZURE_FABRIC_ACCOUNT_NAME}")
     if [ "$RESULT" = "false" ]; then
-        printError "Fabric API is not available, please check whether the Fabric account '${AZURE_PURVIEW_ACCOUNT_NAME}' exists and is in 'Succeeded' state. Check also the VPN connection"
+        printError "Fabric API is not available, please check whether the Fabric account '${AZURE_FABRIC_ACCOUNT_NAME}' exists and is in 'Succeeded' state. Check also the VPN connection"
         exit 1
     fi
-    printProgress "Checking whether the Fabric collection '${AZURE_PURVIEW_ACCOUNT_NAME}' exists..."
-    RESULT=$(doesCollectionExist ${AZURE_PURVIEW_ACCOUNT_NAME})
+    printProgress "Checking whether the Fabric collection '${AZURE_FABRIC_ACCOUNT_NAME}' exists..."
+    RESULT=$(doesCollectionExist ${AZURE_FABRIC_ACCOUNT_NAME})
     if [ "$RESULT" = "false" ]; then
-        printProgress "Creating the collection '${AZURE_PURVIEW_ACCOUNT_NAME}'..."
-        createCollection ${AZURE_PURVIEW_ACCOUNT_NAME}
+        printProgress "Creating the collection '${AZURE_FABRIC_ACCOUNT_NAME}'..."
+        createCollection ${AZURE_FABRIC_ACCOUNT_NAME}
         exit 1
     fi
 
     printProgress "Checking whether the Fabric datasource '${AZURE_PURVIEW_DATASOURCE_NAME}' exists..."
-    RESULT=$(doesDatasourceExist ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME})
+    RESULT=$(doesDatasourceExist ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME})
     if [ "$RESULT" = "false" ]; then
         printProgress "Creating the Datasource '${AZURE_PURVIEW_DATASOURCE_NAME}'..."
         STORAGE_SUBSCRIPTION_ID="$AZURE_SUBSCRIPTION_ID"
         STORAGE_RESOURCE_GROUP_NAME=$(getDatasourceResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
 
         STORAGE_LOCATION=${AZURE_REGION}
-        createDatasource ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_COLLECTION_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${STORAGE_SUBSCRIPTION_ID} ${STORAGE_RESOURCE_GROUP_NAME} ${AZURE_STORAGE_ACCOUNT_NAME} ${STORAGE_LOCATION}
+        createDatasource ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_COLLECTION_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${STORAGE_SUBSCRIPTION_ID} ${STORAGE_RESOURCE_GROUP_NAME} ${AZURE_STORAGE_ACCOUNT_NAME} ${STORAGE_LOCATION}
         if [ $? -ne 0 ]; then
             printError "Failed to create the Datasource '${AZURE_PURVIEW_DATASOURCE_NAME}'"
             exit 1
@@ -2376,10 +2382,10 @@ if [ "${ACTION}" = "scan-public-datasource" ] ; then
     fi
 
     printProgress "Checking whether the Scan Rule Set  '${AZURE_PURVIEW_SCAN_RULE_SETS_NAME}' exists..."
-    RESULT=$(doesScanRuleSetExist ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_SCAN_RULE_SETS_NAME})
+    RESULT=$(doesScanRuleSetExist ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_SCAN_RULE_SETS_NAME})
     if [ "$RESULT" = "false" ]; then
         printProgress "Creating the Scan Rule Set '${AZURE_PURVIEW_SCAN_RULE_SETS_NAME}'..."
-        createScanRuleSet ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_SCAN_RULE_SETS_NAME}
+        createScanRuleSet ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_SCAN_RULE_SETS_NAME}
         if [ $? -ne 0 ]; then
             printError "Failed to create the Scan Rule Set '${AZURE_PURVIEW_SCAN_RULE_SETS_NAME}'"
             exit 1
@@ -2388,17 +2394,17 @@ if [ "${ACTION}" = "scan-public-datasource" ] ; then
 
 
     printProgress "Checking whether the Scan '${AZURE_PURVIEW_SCAN_NAME}' exists..."
-    RESULT=$(doesScanExist ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME})
+    RESULT=$(doesScanExist ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME})
     if [ "$RESULT" = "false" ]; then
         printProgress "Creating the Scan '${AZURE_PURVIEW_SCAN_NAME}'..."
-        createPublicScan ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${AZURE_PURVIEW_COLLECTION_NAME} ${AZURE_PURVIEW_SCAN_RULE_SETS_NAME}
+        createPublicScan ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${AZURE_PURVIEW_COLLECTION_NAME} ${AZURE_PURVIEW_SCAN_RULE_SETS_NAME}
         if [ $? -ne 0 ]; then
             printError "Failed to create the Scan '${AZURE_PURVIEW_SCAN_NAME}'"
             exit 1
         fi
     fi
     printProgress "Triggering the scan '${AZURE_PURVIEW_SCAN_NAME}'..."
-    SCAN_ID=$(triggerScan  ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME})
+    SCAN_ID=$(triggerScan  ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME})
     if [ $? -ne 0 ]; then
         printError "Cannot trigger the Scan  '${AZURE_PURVIEW_SCAN_NAME}'"
         exit 1
@@ -2415,15 +2421,15 @@ if [ "${ACTION}" = "scan-public-datasource" ] ; then
     while [ -z "${STATUS}" ] || [ "${STATUS}" = "Accepted" ]  || [ "${STATUS}" = "InProgress" ] || [ "${STATUS}" = "Queued" ]  && [ $COUNTER -le $MAX ]
     do
         sleep 30
-        STATUS=$(getScanStatus ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${SCAN_ID})
+        STATUS=$(getScanStatus ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${SCAN_ID})
         printProgress "Scan Id: ${SCAN_ID} Status: $STATUS"
         COUNTER=$((COUNTER + 1))
     done
     if [ "${STATUS}" = "Succeeded" ]; then
-        STAT=$(getScanStatistics ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${SCAN_ID})
+        STAT=$(getScanStatistics ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${SCAN_ID})
         printProgress "Assets: $STAT"
     else
-        ERROR=$(getScanError ${AZURE_PURVIEW_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${SCAN_ID})
+        ERROR=$(getScanError ${AZURE_FABRIC_ACCOUNT_NAME} ${AZURE_PURVIEW_DATASOURCE_NAME} ${AZURE_PURVIEW_SCAN_NAME} ${SCAN_ID})
         if [ -z "$ERROR" ]; then
             printError "Scan didn't succeeded, please check the Fabric Studio"
         else

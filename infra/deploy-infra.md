@@ -276,7 +276,7 @@ Usually this step is not required in a pipeline as the connection with Azure is 
     AZURE_ENVIRONMENT defines the environment 'dev', 'stag', 'prod',...
 
 
-2. Once Fabric is deployed into your Azure subscription, you can now deploy a datasources (Azure Storage Account ADLS gen2, Synapse Workspace, Synapse Azure Storage Account ADLS gen2, Synapse SQL pool) associated with public endpoints. This datasource will be accessible for the Fabric account.
+2. Once Fabric is deployed into your Azure subscription, you can now deploy a datasources (Azure Storage Account ADLS gen2, Synapse Workspace, Synapse Azure Storage Account ADLS gen2, PostgreSQL pool) associated with public endpoints. This datasource will be accessible for the Fabric account.
 
     ```bash
         vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-public-datasource
@@ -293,7 +293,7 @@ Usually this step is not required in a pipeline as the connection with Azure is 
     ```
     After this step, the number of assets discovered is displayed. This scan process is using the Azure Integration Runtime, you don't need to deploy a Self Hosted Integration Runtime nor a Managed VNET Integration Runtime.
 
-5. Moreover, as Synapse Workspace, Synapse Azure Storage Account ADLS gen2, Synapse SQL pool have been deployed you can also create a Synapse pipeline and test lineage. You can for instance, follow the steps in this Lab ['Use Microsoft Fabric with Azure Synapse Analytics'](https://microsoftlearning.github.io/dp-203-azure-data-engineer/Instructions/Labs/22-Synapse-fabric.html)
+5. Moreover, as Synapse Workspace, Synapse Azure Storage Account ADLS gen2, PostgreSQL pool have been deployed you can also create a Synapse pipeline and test lineage. You can for instance, follow the steps in this Lab ['Use Microsoft Fabric with Azure Synapse Analytics'](https://microsoftlearning.github.io/dp-203-azure-data-engineer/Instructions/Labs/22-Synapse-fabric.html)
 
 6. When your test are over, you can remove the infrastructure running the following commands:
 
