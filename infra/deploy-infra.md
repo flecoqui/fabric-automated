@@ -2,15 +2,21 @@
 
 ## Introduction
 
-This document describe how to deploy Microsoft Fabric and sample data sources based Azure Storage Account ADLS gen2.
+This document describe how to deploy Microsoft Fabric and sample data sources (Azure Storage Account, CosmosDB, PostgreSQL).
+
 Once the infrastructure is deployed, you can evaluate Microsoft Fabric running different scenarios:
-- Scanning
-- Classification
-- Lineage
+- Creating Copy Data pipeline to DataLake
+- Creating Copy Data pipeline to a KQL DataLake
 
 Moreover, as it's an evaluation of the Fabric infrastructure, it supports both configurations:
 - One configuration with public endpoints to reach Fabric and data sources.
+
+![Public Infrastructure](./../diagrams/public-fabric.png)
+
 - One configuration with private endpoints to reach Fabric and data sources.
+
+![Private Infrastructure](./../diagrams/private-fabric.png)
+
 
 ## Getting Started
 
@@ -111,8 +117,7 @@ You need to install the following pre-requisite on your machine
 The Dev Container is now running, you can use the bash file [./infra/deploy-infra.sh ](../../infra/deploy-infra.sh ) to:
 
 - deploy the infrastructure 
-- trigger datasource scanning
-- trigger custom lineage creation
+- create data copy pipeline
 
 Below the list of arguments associated with 'deploy-infra.sh ':
 
@@ -178,73 +183,50 @@ Usually this step is not required in a pipeline as the connection with Azure is 
 
     For instance:
     ```bash
+        @description('The Azure Environment (dev, staging, preprod, prod,...)')
+        @maxLength(13)
+        param environment string = uniqueString(resourceGroup().id)
 
-      @description('The Azure Environment (dev, staging, preprod, prod,...)')
-      @maxLength(13)
-      param environment string = uniqueString(resourceGroup().id)
+        @description('The cloud visibility (pub, pri)')
+        @maxLength(7)
+        param visibility string = 'pub'
 
-      @description('The cloud visibility (pub, pri)')
-      @maxLength(7)
-      param visibility string = 'pub'
-
-      @description('The Azure suffix')
-      @maxLength(4)
-      param suffix string = '0000'
+        @description('The Azure suffix')
+        @maxLength(4)
+        param suffix string = '0000'
 
 
-      var baseName = toLower('${environment}${visibility}${suffix}')
+        var baseName = toLower('${environment}${visibility}${suffix}')
 
-      output purviewAccountName string = 'fabric-test-myco'
-      output vnetName string = 'vnet${baseName}'
-      output storageAccountName string = 'sadataflowsmyco'
-      output storageAccountDefaultContainerName string = 'test${baseName}'
-      output keyVaultName string = 'sadataflowsmyco'
-      output privateEndpointSubnetName string = 'snet${baseName}pe'
-      output shirSubnetName string = 'snet${baseName}shir'
-      output shirVMSSName string = 'vm${baseName}'
-      output shirLoadBalancerName string = 'lbvm${baseName}'
-      output vpnGatewayName string = 'vnetvpngateway${baseName}'
-      output vpnGatewayPublicIpName string = 'vnetvpngatewaypip${baseName}'
-      output dnsResolverName string = 'vnetdnsresolver${baseName}'
-      output bastionSubnetName string = 'AzureBastionSubnet'
-      output bastionHostName string = 'bastion${baseName}'
-      output bastionPublicIpName string = 'bastionpip${baseName}'
-      output gatewaySubnetName string = 'GatewaySubnet'
-      output dnsDelegationSubNetName string = 'DNSDelegationSubnet'
-      output purviewShirName string = 'SelfHostedIntegrationRuntime-${baseName}'
-      output purviewVnetIrName string = 'IntegrationRuntime-${baseName}'
-      output purviewManagedVnetName string = 'ManagedVnet-${baseName}'
-      output purviewCollectionName string = 'fabric-test-myco'
-      output purviewDataSourceName string = 'dstestmyco'
-      output purviewScanRuleSetsName string = 'srstestmyco'
-      output purviewScanName string = 'scantestmyco'
-      output purviewShirKeyName string = 'SHIR-KEY'
-      output purviewShirVMLoginSecretName string = 'SHIR-VM-LOGIN'
-      output purviewShirVMPassSecretName string = 'SHIR-VM-PASSWORD'
-      output baseName string = baseName
-      output synapseWorkspaceName string = 'synapsemycotest'
-      output synapseStorageAccountName string  = 'synapsest${baseName}'
-      output synapseFileSystemName string = 'synapsefs${baseName}'
-      output synapseSqlAdministratorLoginSecretName string = 'SYNAPSE-SQL-LOGIN'
-      output synapseSqlAdministratorPassSecretName string = 'SYNAPSE-SQL-PASSWORD'
-      output synapseSqlPoolName string = 'sql${baseName}'
-
-      type SqlPoolSku = 'DW100c' | 'DW200c' | 'DW300c' | 'DW400c' | 'DW500c' | 'DW1000c' | 'DW1500c' | 'DW2000c' | 'DW2500c' | 'DW3000c'
-      output synapseSqlPoolSku SqlPoolSku = 'DW100c'
-      output synapseSparkPoolName string = 'spark${baseName}'
-
-      type SparkNodeSize = 'Small' | 'Medium' | 'Large' | 'XLarge' | 'XXLarge'
-      output synapseSparkPoolNodeSize SparkNodeSize = 'Small'
-      output synapseSparkPoolMinNodeCount int = 3
-      output synapseSparkPoolMaxNodeCount int = 5
-      output synapseSparkPoolAutoScaleEnabled bool = true
-      output synapseSparkPoolAutoPauseEnabled bool = true
-      output synapseSparkPoolAutoPauseDelayInMinutes int = 15
-
-      type SparkVersion = '2.4' | '3.1' | '3.2' | '3.3' | '3.4'
-      output synapseSparkVersion SparkVersion = '3.4'
-      output resourceGroupFabricName string = 'fabric-myco-test'
-      output resourceGroupDatasourceName string = 'fabric-myco-test'
+        output fabricAccountName string = 'fabric${baseName}'
+        output fabricWorkspaceName string = 'workspace${baseName}'
+        output vnetName string = 'vnet${baseName}'
+        output storageAccountName string = 'st${baseName}'
+        output storageAccountDefaultContainerName string = 'test${baseName}'
+        output keyVaultName string = 'kv${baseName}'
+        output privateEndpointSubnetName string = 'snet${baseName}pe'
+        output datagwSubnetName string = 'snet${baseName}dtgw'
+        output datagwVMSSName string = 'vm${baseName}'
+        output datagwLoadBalancerName string = 'lbvm${baseName}'
+        output vpnGatewayName string = 'vnetvpngateway${baseName}'
+        output vpnGatewayPublicIpName string = 'vnetvpngatewaypip${baseName}'
+        output dnsResolverName string = 'vnetdnsresolver${baseName}'
+        output bastionSubnetName string = 'AzureBastionSubnet'
+        output bastionHostName string = 'bastion${baseName}'
+        output bastionPublicIpName string = 'bastionpip${baseName}'
+        output gatewaySubnetName string = 'GatewaySubnet'
+        output dnsDelegationSubNetName string = 'DNSDelegationSubnet'
+        output baseName string = baseName
+        output postgreSqlServerName string = 'postgre${baseName}'
+        output postgreSqlAdministratorLoginSecretName string = 'POSTGRE-SQL-LOGIN'
+        output postgreSqlAdministratorPassSecretName string = 'POSTGRE-SQL-PASSWORD'
+        type SqlSku = 'Standard_D2ds_v4' | 'Standard_D4ds_v4' 
+        output postgreSqlSku SqlSku = 'Standard_D2ds_v4'
+        type sqlVersion = '11' | '12' | '13' | '14' | '15' | '16' | '17' | '18'
+        output postgreSqlVersion sqlVersion = '13'
+        output cosmosDBName string = 'cosmos${baseName}'
+        output resourceGroupFabricName string = 'rgfabric${baseName}'
+        output resourceGroupDatasourceName string = 'rgdatasource${baseName}'
     ```
 
 #### Deploying Fabric and Data Source with public endpoint
@@ -284,16 +266,7 @@ Usually this step is not required in a pipeline as the connection with Azure is 
     After this step, dataset files are copied in the container 'test01' in the new storage.
 
 
-3. From this stage, you can open the Fabric portal (https://web.fabric.azure.com/) to test scanning, classification and lineage scenarios.
-
-4. You can also trigger an automated scan process using the command line below:
-
-    ```bash
-        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a scan-public-datasource
-    ```
-    After this step, the number of assets discovered is displayed. This scan process is using the Azure Integration Runtime, you don't need to deploy a Self Hosted Integration Runtime nor a Managed VNET Integration Runtime.
-
-5. Moreover, as Synapse Workspace, Synapse Azure Storage Account ADLS gen2, PostgreSQL pool have been deployed you can also create a Synapse pipeline and test lineage. You can for instance, follow the steps in this Lab ['Use Microsoft Fabric with Azure Synapse Analytics'](https://microsoftlearning.github.io/dp-203-azure-data-engineer/Instructions/Labs/22-Synapse-fabric.html)
+3. From this stage, you can open the Fabric portal (https://app.fabric.microsoft.com/) to check whether the Workspace has been created with the following name format: workspace{env}{visibility}{suffix}
 
 6. When your test are over, you can remove the infrastructure running the following commands:
 
@@ -361,34 +334,16 @@ Usually this step is not required in a pipeline as the connection with Azure is 
     ```
     After this step, dataset files are copied in the container 'test01' in the new storage.
 
-##### Deploying Fabric Managed VNET Integration Runtime
 
-1. If your data source is connected to a VNET through private endpoint and accessible with Role Based Access Control, you can deploy a Managed VNET Integration Runtime to scan your data sources running the following commands:
+##### Deploying Fabric Data Gateway
 
-    ```bash
-        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-private-vnetir
-    ```
-2. This command will deploy the Managed VNET Integration Runtime, create the private endpoint and approve those endpoints. The Managed VNET Integration Runtime will be in 'Running' state after 10 minutes. After this stage, your infrastructure is ready to scan the data sources connected to the VNET.
-
-##### Deploying Fabric Self Hosted Integration Runtime
-
-1. If your data source is connected to a VNET through private endpoint and accessible using Storage Account Key, you can deploy a Self Hosted Integration Runtime to scan your data sources running the following commands:
+1. If your data source is connected to a VNET through private endpoint and accessible using Storage Account Key, you can deploy a Fabric Data Gateway to establish a connection with your data sources running the following commands:
 
     ```bash
-        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-private-shir
+        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-private-datagw
     ```
-2. This command will deploy the Self Hosted Integration Runtime in Microsoft Fabric portal, deploy a virtual machine connected to the VNET. The Self Hosted Integration Runtime will be in 'Running' state after 15 minutes. After this stage, the infrastructure is ready to scan storage accounts connected to the same virtual network. The Azure Storage Acount Key will be stored in the Azure Key Vault in a specific secret which will be used by the virtual machine running the Self Hosted Integration Runtime.
+2. This command will deploy the Fabric Data Gateway in Microsoft Fabric portal, deploy a virtual machine connected to the VNET. The Self Hosted Integration Runtime will be in 'Running' state after 15 minutes. After this stage, the infrastructure is ready to scan storage accounts connected to the same virtual network. The Azure Storage Acount Key will be stored in the Azure Key Vault in a specific secret which will be used by the virtual machine running the Fabric Data Gateway.
 
-##### Scanning the private datasource
-
-
-1. As the Fabric Managed VNET Integration Runtime has been deployed, and as soon as the managed VNET Integration Runtime is in 'Running' status, you can trigger an automated scan process using the command line below:
-
-    ```bash
-        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a scan-private-datasource
-    ```
-
-    After this step, the number of assets discovered is displayed. This scan process is using the Managed VNET Integration Runtime.
 
 ##### Removing the resources
 

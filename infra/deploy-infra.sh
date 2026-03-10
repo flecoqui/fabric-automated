@@ -1624,7 +1624,7 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
     printProgress "$cmd"
     eval "$cmd" >/dev/null
     sleep 30
-    
+
     printProgress "Creating Product table 'Product' in PostgreSQL  database '$AZURE_POSTGRESQL_NAME'"
     POSTGRESQL_DATABASE="products"
     cmd="PGPASSWORD=$POSTGRESQL_ADMIN_PASSWORD  \
@@ -1653,7 +1653,7 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
     createFabricKeyVaultManagedPrivateEndpoints "${AZURE_FABRIC_WORKSPACE_NAME}" "${AZURE_RESOURCE_GROUP_FABRIC_NAME}" "${AZURE_KEY_VAULT_NAME}"
     createFabricStorageManagedPrivateEndpoints "${AZURE_FABRIC_WORKSPACE_NAME}" "${AZURE_RESOURCE_GROUP_DATASOURCE_NAME}" "${AZURE_STORAGE_ACCOUNT_NAME}" 
     createFabricPostgreSQLManagedPrivateEndpoints "${AZURE_FABRIC_WORKSPACE_NAME}" "${AZURE_RESOURCE_GROUP_DATASOURCE_NAME}" "${AZURE_POSTGRESQL_NAME}"
-    createFabricCosmosDBManagedPrivateEndpoints "${AZURE_FABRIC_WORKSPACE_NAME}" "${AZURE_RESOURCE_GROUP_DATASOURCE_NAME}" "${AZURE_COSMOSDB_ACCOUNT_NAME}"
+    createFabricCosmosDBManagedPrivateEndpoints "${AZURE_FABRIC_WORKSPACE_NAME}" "${AZURE_RESOURCE_GROUP_DATASOURCE_NAME}" "${AZURE_COSMOS_DB_NAME}"
     
     exit 0
 fi
