@@ -578,12 +578,16 @@ getCurrentObjectType() {
 createFabricWorkspace() {
   TOKEN=$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)
   WORKSPACE_NAME=$1
+  FABRIC_CAPACITY_ID=$(curl --request GET \
+  --url "https://api.fabric.microsoft.com/v1/capacities" \
+  --header "Authorization: Bearer $TOKEN" --fail --silent --show-error  | jq -r ".value[] | select(.sku==\"${FABRIC_SKU}\") | .id")    
+  
   curl --request POST \
     --url "https://api.fabric.microsoft.com/v1/workspaces" \
     --header "Authorization: Bearer $TOKEN" \
     --header "Content-Type: application/json" \
     --fail --silent --show-error \
-    --data "{\"displayName\": \"${WORKSPACE_NAME}\"}"    
+    --data "{\"displayName\": \"${WORKSPACE_NAME}\",\"capacityId\": \"${FABRIC_CAPACITY_ID}\"}"    
 }
 ##############################################################################
 #- getFabricWorkspaceId
@@ -1013,7 +1017,7 @@ ARG_REGION="${DEFAULT_REGION}"
 ARG_SUBSCRIPTION_ID="${DEFAULT_SUBSCRIPTION_ID}"
 ARG_TENANT_ID="${DEFAULT_TENANT_ID}"
 ARG_RESOURCE_GROUP="${DEFAULT_RESOURCE_GROUP}"
-
+FABRIC_SKU="F2"
 # shellcheck disable=SC2034
 while getopts "a:c:e:r:s:t:g:" opt; do
     case $opt in
@@ -1156,6 +1160,7 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
     env=${AZURE_ENVIRONMENT} \
     visibility=${VISIBILITY} \
     suffix=${AZURE_SUFFIX} \
+    fabricSKU=${FABRIC_SKU} \
     objectId=\"${OBJECT_ID}\" objectType=\"${OBJECT_TYPE}\" principalName=\"${PRINCIPAL_NAME}\"   clientIpAddress=\"${CLIENT_IP_ADDRESS}\"  \
      --verbose"
     printProgress "$cmd"
@@ -1346,6 +1351,7 @@ if [ "${ACTION}" = "deploy-private-fabric" ] ; then
     env=${AZURE_ENVIRONMENT} \
     visibility=${VISIBILITY} \
     suffix=${AZURE_SUFFIX} \
+    fabricSKU=${FABRIC_SKU} \
     vnetAddressPrefix=\"10.13.0.0/16\" \
     privateEndpointSubnetAddressPrefix=\"10.13.0.0/24\" \
     bastionSubnetAddressPrefix=\"10.13.1.0/24\" \

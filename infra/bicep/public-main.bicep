@@ -16,6 +16,23 @@ param suffix string = '0000'
 @description('The principal name of the user or service principal running the script.')
 param principalName string = ''
 
+@description('The fabric sku.')
+@allowed([
+  'F2'
+  'F4'
+  'F8'
+  'F16'
+  'F32'
+  'F64'
+  'F128'
+  'F256'
+  'F512'
+  'F1024'
+  'F2048'
+])
+param fabricSKU string = 'F2'
+
+
 @description('The user object Id of the user or service principal running the script.')
 param objectId string = ''
 
@@ -42,7 +59,6 @@ var tags = {
   suffix: suffix
 }
 
-var fabricSKU = 'F2'
 
 // Azure Key Vault related variables
 var keyVaultName = namingModule.outputs.keyVaultName

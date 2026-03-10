@@ -13,6 +13,22 @@ param visibility string = 'pri'
 @maxLength(4)
 param suffix string = '0000'
 
+@description('The fabric sku.')
+@allowed([
+  'F2'
+  'F4'
+  'F8'
+  'F16'
+  'F32'
+  'F64'
+  'F128'
+  'F256'
+  'F512'
+  'F1024'
+  'F2048'
+])
+param fabricSKU string = 'F2'
+
 @description('The IP address prefix for the virtual network')
 param vnetAddressPrefix string = '10.13.0.0/16'
 
@@ -77,7 +93,6 @@ var datagwSubnetName = namingModule.outputs.datagwSubnetName
 var keyVaultName = namingModule.outputs.keyVaultName
 // Fabric
 var fabricAccountName = namingModule.outputs.fabricAccountName
-var fabricSKU = 'F2'
 
 // Private DNS Zone variables
 var privateDnsNames = [
