@@ -207,7 +207,6 @@ Usually this step is not required in a pipeline as the connection with Azure is 
         output privateEndpointSubnetName string = 'snet${baseName}pe'
         output datagwSubnetName string = 'snet${baseName}dtgw'
         output datagwVMSSName string = 'vm${baseName}'
-        output datagwLoadBalancerName string = 'lbvm${baseName}'
         output vpnGatewayName string = 'vnetvpngateway${baseName}'
         output vpnGatewayPublicIpName string = 'vnetvpngatewaypip${baseName}'
         output dnsResolverName string = 'vnetdnsresolver${baseName}'

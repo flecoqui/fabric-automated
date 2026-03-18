@@ -33,6 +33,20 @@ param sqlAdministratorLogin string
 @secure()
 param sqlAdministratorPassword string
 
+@description('The SKU name of the virtual machine scale set.')
+param vmSkuName string = 'Standard_B2ms'
+
+@description('The name of the administrator account.')
+param administratorUsername string = 'VmssMainUser'
+
+@description('The password of the administrator account.')
+@secure()
+param administratorPassword string
+
+@description('The authentication key for the fabric integration runtime.')
+@secure()
+param recoveryKey string
+
 @description('The Fabric account principal ID.')
 param fabricPrincipalId string = ''
 
@@ -76,6 +90,9 @@ var dfsPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResou
 var blobPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.blob.${environment().suffixes.storage}')
 var postgresqlPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.postgres.database.azure.com')
 var cosmosdbPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.documents.azure.com')
+var searchPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.search.windows.net')
+
+
 ///subscriptions/4b6e25b6-6b90-497a-9aa7-e673e32bc08c/resourceGroups/rgprivatepurview/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net
 //var dfsPrivateDnsZoneId = resourceId('4b6e25b6-6b90-497a-9aa7-e673e32bc08c', 'rgprivatepurview', 'Microsoft.Network/privateDnsZones', 'privatelink.blob.core.windows.net')
 
@@ -130,7 +147,7 @@ module postgreSQLModule 'private-postgresql.bicep' = {
 module cosmosModule 'private-cosmosdb.bicep' = {
   name: 'CosmosDBDeploy'
   scope: resourceGroup()
-  params: {
+  params: { 
     cosmosDBName: namingModule.outputs.cosmosDBName
     baseName: namingModule.outputs.baseName
     location: location
@@ -146,9 +163,54 @@ module cosmosModule 'private-cosmosdb.bicep' = {
   ]
 }
 
+
+module searchModule 'private-search.bicep' = {
+  name: 'SearchDeploy'
+  scope: resourceGroup()
+  params: {
+    searchName: namingModule.outputs.searchName
+    baseName: namingModule.outputs.baseName
+    location: location
+    tags: tags
+    vnetName: vnetName
+    subnetName: privateEndpointSubnetName
+    vnetResourceGroupName: dnsZoneResourceGroupName
+    searchPrivateDnsZoneId: searchPrivateDnsZoneId
+    fabricPrincipalId: fabricPrincipalId
+    objectId: objectId
+    objectType: objectType
+  }
+  dependsOn: [
+  ]
+}
+
+module dataGatewayModule 'private-datagw.bicep' = {
+  name: 'DataGatewayDeploy'
+  scope: resourceGroup()
+  params: {
+    vmName: namingModule.outputs.datagwVMName
+    baseName: namingModule.outputs.baseName
+    location: location
+    tags: tags
+    vnetName: vnetName
+    subnetName: privateEndpointSubnetName
+    vmSkuName: vmSkuName
+    administratorUsername: administratorUsername
+    administratorPassword: administratorPassword
+    recoveryKey: recoveryKey
+  }
+  dependsOn: [
+  ]
+}
+
 output outStorageAccountName string = storageModule.outputs.outStorageAccountName
 output outStorageFilesysName string = storageModule.outputs.outStorageFilesysName
 output postgresqlId string = postgreSQLModule.outputs.postgreSqlServerId
 output postgresqlName string = postgreSQLModule.outputs.postgreSqlServerName  
 output cosmosDBName string = cosmosModule.outputs.cosmosDBName
 output cosmosDBId string = cosmosModule.outputs.cosmosDBId
+output searchName string = searchModule.outputs.searchName
+output searchId string = searchModule.outputs.searchId
+output searchEndpoint string = searchModule.outputs.searchEndpoint
+output datagwVMPrivateIp string = dataGatewayModule.outputs.privateIpAddress
+output datagwVMResourceId string = dataGatewayModule.outputs.vmResourceId

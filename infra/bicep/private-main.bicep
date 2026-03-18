@@ -101,6 +101,7 @@ var privateDnsNames = [
   'privatelink.dfs.${environment().suffixes.storage}'
   'privatelink.postgres.database.azure.com'
   'privatelink.documents.azure.com'
+  'privatelink.search.windows.net'
 ]
 
 // Defining Private DNS Zones resource group and subscription id

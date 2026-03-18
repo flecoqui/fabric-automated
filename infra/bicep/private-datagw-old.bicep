@@ -15,13 +15,7 @@ param visibility string = 'pri'
 param suffix string = '0000'
 
 @description('The SKU name of the virtual machine scale set.')
-param vmssSkuName string = 'Standard_B2ms'
-
-@description('The SKU tier of virtual machines in a scale set.')
-param vmssSkuTier string = 'Standard'
-
-@description('The SKU capacity of virtual machines in a scale set.')
-param vmssSkuCapacity int = 1
+param vmSkuName string = 'Standard_B2ms'
 
 @description('The name of the administrator account.')
 param administratorUsername string = 'VmssMainUser'
@@ -32,7 +26,10 @@ param administratorPassword string
 
 @description('The authentication key for the fabric integration runtime.')
 @secure()
-param purviewIntegrationRuntimeAuthKey string
+param recoveryKey string
+
+@description('The tags to be applied to the provisioned resources.')
+param tags object
 
 module namingModule 'naming-convention.bicep' = {
   name: 'namingModule'
@@ -44,20 +41,22 @@ module namingModule 'naming-convention.bicep' = {
 }
 
 
-module shirvm 'shir.bicep' = {
-  name: 'shirvmDeploy'
+module datagwvm 'datagw.bicep' = {
+  name: 'datagwvmDeploy'
   scope: resourceGroup()
   params: {
     location: location
+    vmName: namingModule.outputs.datagwVMName
+    baseName: namingModule.outputs.baseName
+    vmSkuName:vmSkuName
     vnetName: namingModule.outputs.vnetName
-    subnetName: namingModule.outputs.shirSubnetName
-    vmssName: namingModule.outputs.shirVMSSName
-    loadbalancerName: namingModule.outputs.shirLoadBalancerName
-    vmssSkuName:vmssSkuName
-    vmssSkuTier:vmssSkuTier
-    vmssSkuCapacity:vmssSkuCapacity
+    subnetName: namingModule.outputs.datagwSubnetName
     administratorUsername:administratorUsername
     administratorPassword:administratorPassword
-    purviewIntegrationRuntimeAuthKey: purviewIntegrationRuntimeAuthKey
+    recoveryKey: recoveryKey
+    tags: tags
   }
 }
+
+output privateIpAddress string = datagwvm.outputs.privateIpAddress
+output vmResourceId string = datagwvm.outputs.vmResourceId

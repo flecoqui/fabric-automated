@@ -138,6 +138,21 @@ module cosmosModule 'public-cosmosdb.bicep' = {
   ]
 }
 
+module searchModule 'public-search.bicep' = {
+  name: 'SearchDeploy'
+  scope: resourceGroup()
+  params: {
+    searchName: namingModule.outputs.searchName
+    location: location
+    fabricPrincipalId: fabricPrincipalId
+    objectId: objectId
+    objectType: objectType
+    tags: tags
+  }
+  dependsOn: [
+  ]
+}
+
 output outStorageAccountName string = storageModule.outputs.outStorageAccountName
 output outStorageFilesysName string = storageModule.outputs.outStorageFilesysName
 output postgresqlId string = postgresqlModule.outputs.postgresqlId
@@ -146,5 +161,7 @@ output postgresqlEndpoint string = postgresqlModule.outputs.postgresqlEndpoint
 output postgresqlAdminLogin string = postgresqlModule.outputs.postgresqlAdminLogin
 output postgresqlVersion string = postgresqlModule.outputs.postgresqlVersion
 output postgresqlStorageSizeGB int = postgresqlModule.outputs.postgresqlStorageSizeGB
-
 output cosmosDBName string = cosmosModule.outputs.cosmosDBName
+output searchName string = searchModule.outputs.searchName
+output searchId string = searchModule.outputs.searchId
+output searchEndpoint string = searchModule.outputs.searchEndpoint
