@@ -15,6 +15,9 @@ param vnetName string
 @description('The Subnet name.')
 param subnetName string
 
+@description('Name of the resource group containing the virtual network.')
+param vnetResourceGroupName string
+
 @description('The SKU name of the virtual machine scale set.')
 param vmSkuName string = 'Standard_B2ms'
 
@@ -29,10 +32,16 @@ param administratorPassword string
 @secure()
 param recoveryKey string
 
+@description('The user object Id who will be data gateway administrator.')
+param objectId string = ''
+
+@description('The application id used for the authentication of the data gateway with the tenant.')
+param appId string = ''
+
 @description('The tags to be applied to the provisioned resources.')
 param tags object
 // Variables
-var subnetId = '${resourceId('Microsoft.Network/virtualNetworks', vnetName)}/subnets/${subnetName}'
+var privateSubnetId = resourceId(vnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, subnetName)
 
 
 resource nic 'Microsoft.Network/networkInterfaces@2023-11-01' = {
@@ -45,7 +54,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2023-11-01' = {
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: subnetId
+            id: privateSubnetId
           }
         }
       }
@@ -60,6 +69,9 @@ resource nic 'Microsoft.Network/networkInterfaces@2023-11-01' = {
 resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
   name: vmName
   location: location
+  identity: {
+        type: 'SystemAssigned'
+  }  
   properties: {
     hardwareProfile: {
       vmSize: vmSkuName
@@ -99,7 +111,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
   }
   tags: tags
 }
-
+var tenantId = subscription().tenantId
 resource extension 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = {
   parent: vm
    name: '${vmName}-datagw-integrationruntime'
@@ -113,12 +125,22 @@ resource extension 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = {
       fileUris: []
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command "cp c:/azuredata/customdata.bin c:/azuredata/installDataGateway.ps1; c:/azuredata/installDataGateway.ps1 -gatewayName ${vmName} -recoveryKey "${recoveryKey}"'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command "cp c:/azuredata/customdata.bin c:/azuredata/installDataGateway.ps1; c:/azuredata/installDataGateway.ps1 -gatewayName ${vmName} -recoveryKey ${recoveryKey} -baseName ${baseName} -userObjectId ${objectId} -appId ${appId} -tenantId ${tenantId} '
     }
   }
   tags: tags
 }
 
+// Reference existing Key Vault
+var keyVaultName = 'kv${baseName}'
+module keyVaultRoleAssignments 'private-datagw-kv-roles.bicep' = {
+  name: 'kvRoleAssignments'
+  scope: resourceGroup(vnetResourceGroupName)
+  params: {
+    keyVaultName: keyVaultName
+    principalId: vm.identity.principalId
+  }
+}
 
 output privateIpAddress string = nic.properties.ipConfigurations[0].properties.privateIPAddress
 output vmResourceId string = vm.id

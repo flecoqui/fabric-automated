@@ -59,6 +59,9 @@ param objectType string = 'User'
 @description('The client IP address.')
 param clientIpAddress string = ''
 
+@description('The application id used for the authentication of the data gateway with the tenant.')
+param appId string = ''
+
 module namingModule 'naming-convention.bicep' = {
   name: 'namingModule'
   params: {
@@ -194,10 +197,13 @@ module dataGatewayModule 'private-datagw.bicep' = {
     tags: tags
     vnetName: vnetName
     subnetName: privateEndpointSubnetName
+    vnetResourceGroupName: dnsZoneResourceGroupName
     vmSkuName: vmSkuName
     administratorUsername: administratorUsername
     administratorPassword: administratorPassword
     recoveryKey: recoveryKey
+    objectId: objectId
+    appId: appId
   }
   dependsOn: [
   ]

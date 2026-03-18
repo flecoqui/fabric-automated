@@ -183,7 +183,14 @@ setAzureResourceNames()
     echo "AZURE_DATAGW_VM_PASSWORD_SECRET_NAME: $AZURE_DATAGW_VM_PASSWORD_SECRET_NAME"
     AZURE_DATAGW_VM_RECOVERY_KEY_SECRET_NAME=$(echo ${RESULT}  | jq -r '.datagwVMRecoveryKeySecretName.value' 2>/dev/null)
     echo "AZURE_DATAGW_VM_RECOVERY_KEY_SECRET_NAME: $AZURE_DATAGW_VM_RECOVERY_KEY_SECRET_NAME"
-
+    AZURE_DATAGW_CERTIFICATE_SECRET_NAME=$(echo ${RESULT}  | jq -r '.datagwCertificateSecretName.value' 2>/dev/null)
+    echo "AZURE_DATAGW_CERTIFICATE_SECRET_NAME: $AZURE_DATAGW_CERTIFICATE_SECRET_NAME"
+    AZURE_DATAGW_CERTIFICATE_PASSWORD_SECRET_NAME=$(echo ${RESULT}  | jq -r '.datagwCertificatePasswordSecretName.value' 2>/dev/null)
+    echo "AZURE_DATAGW_CERTIFICATE_PASSWORD_SECRET_NAME: $AZURE_DATAGW_CERTIFICATE_PASSWORD_SECRET_NAME"
+    AZURE_DATAGW_CERTIFICATE_NAME=$(echo ${RESULT}  | jq -r '.datagwCertificateName.value' 2>/dev/null)
+    echo "AZURE_DATAGW_CERTIFICATE_NAME: $AZURE_DATAGW_CERTIFICATE_NAME"
+    AZURE_DATAGW_APP_NAME=$(echo ${RESULT}  | jq -r '.datagwAppName.value' 2>/dev/null)
+    echo "AZURE_DATAGW_APP_NAME: $AZURE_DATAGW_APP_NAME"
 
     AZURE_VPN_GATEWAY_PIP_NAME=$(echo ${RESULT}  | jq -r '.vpnGatewayPublicIpName.value' 2>/dev/null)
     echo "AZURE_VPN_GATEWAY_PIP_NAME: $AZURE_VPN_GATEWAY_PIP_NAME"
@@ -999,7 +1006,7 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
         WORKSPACE_IDENTITY=$(getFabricWorkspaceIdentity "${WORKSPACE_ID}")
         if [ -z "${WORKSPACE_IDENTITY}" ] || [ "${WORKSPACE_IDENTITY}" = "null" ]; then
             printProgress "Creating Fabric workspace identity for workspace name ${AZURE_FABRIC_WORKSPACE_NAME}"
-            createFabricWorkspaceIdentity "${WORKSPACE_ID}"
+            RESULT=$(createFabricWorkspaceIdentity "${WORKSPACE_ID}")
             sleep 10
             WORKSPACE_IDENTITY=$(getFabricWorkspaceIdentity "${WORKSPACE_ID}")
         fi
@@ -1200,7 +1207,7 @@ if [ "${ACTION}" = "deploy-private-fabric" ] ; then
         WORKSPACE_IDENTITY=$(getFabricWorkspaceIdentity "${WORKSPACE_ID}")
         if [ -z "${WORKSPACE_IDENTITY}" ] || [ "${WORKSPACE_IDENTITY}" = "null" ]; then
             printProgress "Creating Fabric workspace identity for workspace name ${AZURE_FABRIC_WORKSPACE_NAME}"
-            createFabricWorkspaceIdentity "${WORKSPACE_ID}"
+            RESULT=$(createFabricWorkspaceIdentity "${WORKSPACE_ID}")
             sleep 10
             WORKSPACE_IDENTITY=$(getFabricWorkspaceIdentity "${WORKSPACE_ID}")
         fi
@@ -1295,6 +1302,68 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
         updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_DATAGW_VM_RECOVERY_KEY_SECRET_NAME}" "${DATA_GATEWAY_RECOVERY_KEY}"
     fi
 
+    AZURE_DATAGW_CERTIFICATE_SECRET_NAME
+    AZURE_DATAGW_CERTIFICATE_PASSWORD_SECRET_NAME
+
+    DATA_GATEWAY_CERTIFICATE_PASSWORD=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_DATAGW_CERTIFICATE_PASSWORD_SECRET_NAME}")
+    if [ -z "${DATA_GATEWAY_CERTIFICATE_PASSWORD}" ]; then
+        printProgress "Generating and storing Data Gateway certificate password in Key Vault  ${AZURE_KEY_VAULT_NAME}"
+        DATA_GATEWAY_CERTIFICATE_PASSWORD=$(openssl rand -base64 32)
+        updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_DATAGW_CERTIFICATE_PASSWORD_SECRET_NAME}" "${DATA_GATEWAY_CERTIFICATE_PASSWORD}"
+    fi
+
+    DATA_GATEWAY_CERTIFICATE=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_DATAGW_CERTIFICATE_SECRET_NAME}")
+    if [ -z "${DATA_GATEWAY_CERTIFICATE}" ]; then
+        printProgress "Generating and storing Data Gateway certificate in Key Vault  ${AZURE_KEY_VAULT_NAME}"
+        DAYS=730
+        # private key
+        printProgress "Creating private key for Data Gateway certificate"
+        openssl genrsa -out ${AZURE_DATAGW_CERTIFICATE_NAME}.key 2048
+        # self-signed certificate
+        printProgress "Creating self-signed certificate for Data Gateway"
+        openssl req -new -x509 \
+        -key ${AZURE_DATAGW_CERTIFICATE_NAME}.key \
+        -out ${AZURE_DATAGW_CERTIFICATE_NAME}.crt \
+        -days $DAYS \
+        -subj "/CN=${AZURE_DATAGW_CERTIFICATE_NAME}"
+        printProgress "Creating pfx file for Data Gateway certificate"
+        openssl pkcs12 -export \
+        -out ${AZURE_DATAGW_CERTIFICATE_NAME}.pfx \
+        -inkey ${AZURE_DATAGW_CERTIFICATE_NAME}.key \
+        -in ${AZURE_DATAGW_CERTIFICATE_NAME}.crt \
+        -password pass:$DATA_GATEWAY_CERTIFICATE_PASSWORD
+        printProgress "Importing pfx file for Data Gateway certificate in key vault ${AZURE_KEY_VAULT_NAME}"
+        az keyvault certificate import \
+        --vault-name ${AZURE_KEY_VAULT_NAME} \
+        --name ${AZURE_DATAGW_CERTIFICATE_SECRET_NAME} \
+        --file ${AZURE_DATAGW_CERTIFICATE_NAME}.pfx \
+        --password $DATA_GATEWAY_CERTIFICATE_PASSWORD
+    fi
+
+    APP_ID=$(az ad app list --display-name ${AZURE_DATAGW_APP_NAME}  --all --query [0].appId -o tsv)
+    if [ -z "${APP_ID}" ]; then
+        printProgress "Creating application for Data Gateway"
+        APP_ID=$(az ad app create \
+        --display-name $AZURE_DATAGW_APP_NAME \
+        --query appId -o tsv)
+        printProgress "Associating application for Data Gateway with certificate ${AZURE_DATAGW_CERTIFICATE_NAME}.crt"
+        az ad app credential reset \
+        --id $APP_ID \
+        --cert @${AZURE_DATAGW_CERTIFICATE_NAME}.crt
+
+        printProgress "Add permission to use Power BI application for Data Gateway"
+        POWERBI_APP_ID=00000009-0000-0000-c000-000000000000
+        az ad app permission add \
+        --id $APP_ID \
+        --api $POWERBI_APP_ID \
+        --api-permissions \
+            654b31ae-d941-4e22-8798-7add8fdf049f=Role \
+            28379fa9-8596-4fd9-869e-cb60a93b5d84=Role
+
+        printProgress "Create admin consent for application"
+        # az ad app permission grant --id $APP_ID --api $POWERBI_APP_ID
+        az ad app permission admin-consent --id $APP_ID
+    fi
 
     printProgress "Deploy private datasource in resource group '${RESOURCE_GROUP_NAME}'"
     cmd="az deployment group create --resource-group $RESOURCE_GROUP_NAME \

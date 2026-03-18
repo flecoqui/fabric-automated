@@ -55,11 +55,22 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
 }
 
 var roleKeyVaultSecretOfficer = 'b86a8fe4-44ce-4948-aee5-eccb2c155cd7'
-resource keyVaultRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource keyVaultSecretRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(keyVault.id, objectId, roleKeyVaultSecretOfficer)
   scope: keyVault
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleKeyVaultSecretOfficer)
+    principalId: objectId
+    principalType: objectType
+  }
+}
+
+var roleKeyVaultCertificateOfficer = 'a4417e6f-fecd-4de8-b567-7b0420556985'
+resource keyVaultCertificateRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(keyVault.id, objectId, roleKeyVaultCertificateOfficer)
+  scope: keyVault
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleKeyVaultCertificateOfficer)
     principalId: objectId
     principalType: objectType
   }
