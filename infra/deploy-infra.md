@@ -332,17 +332,8 @@ Usually this step is not required in a pipeline as the connection with Azure is 
         vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-private-datasource
     ```
     After this step, dataset files are copied in the container 'test01' in the new storage.
-
-
-##### Deploying Fabric Data Gateway
-
-1. If your data source is connected to a VNET through private endpoint and accessible using Storage Account Key, you can deploy a Fabric Data Gateway to establish a connection with your data sources running the following commands:
-
-    ```bash
-        vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-private-datagw
-    ```
-2. This command will deploy the Fabric Data Gateway in Microsoft Fabric portal, deploy a virtual machine connected to the VNET. The Self Hosted Integration Runtime will be in 'Running' state after 15 minutes. After this stage, the infrastructure is ready to scan storage accounts connected to the same virtual network. The Azure Storage Acount Key will be stored in the Azure Key Vault in a specific secret which will be used by the virtual machine running the Fabric Data Gateway.
-
+    Moreover, This command will deploy the On Premises Data Gateway connected to the VNET. This data gateway can be used from Microsoft Fabric to establish a connection with fully isolated data source.
+    
 
 ##### Removing the resources
 
