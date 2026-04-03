@@ -716,6 +716,17 @@ installSqlcmd(){
     source ~/.bashrc
 }
 ##############################################################################
+#- isGuid: Check if the input string is a valid GUID 
+##############################################################################
+isGuid()
+{
+    if echo "$1" | grep -qE '^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$'; then
+        echo "true"
+    else
+        echo "false"
+    fi
+}
+##############################################################################
 #- createFabricPostgreSQLManagedPrivateEndpoints 
 ##############################################################################
 createFabricPostgreSQLManagedPrivateEndpoints ()
@@ -730,16 +741,28 @@ createFabricPostgreSQLManagedPrivateEndpoints ()
     workspaceId=$(getFabricWorkspaceId $workspaceName)
 
     printProgress "Creating Managed Private Endpoint: $endpointName"
-    curl --request POST \
+    ID=$(curl --request GET \
         --url "https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/managedPrivateEndpoints" \
         --header "Authorization: Bearer $token" \
         --header "Content-Type: application/json" \
-        --data  "{\"name\": \"${endpointName}\",\"targetPrivateLinkResourceId\": \"${postgresqlResourceId}\",\"targetSubresourceType\": \"${groupId}\",\"requestMessage\": \"Fabric access request for PostgreSQL\"}" \
-        --fail --silent --show-error 
-    sleep 30
+         --fail --silent --show-error | jq -r ".value[] | select(.name==\"${endpointName}\") | .id")
+    isGuid=$(isGuid "$ID")
+    if [ "$isGuid" = "true" ]; then
+        printProgress "Managed Private Endpoint: $endpointName already exists with id: $ID"
+    else
+        printProgress "Creating Managed Private Endpoint: $endpointName "   
+
+        curl --request POST \
+            --url "https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/managedPrivateEndpoints" \
+            --header "Authorization: Bearer $token" \
+            --header "Content-Type: application/json" \
+            --data  "{\"name\": \"${endpointName}\",\"targetPrivateLinkResourceId\": \"${postgresqlResourceId}\",\"targetSubresourceType\": \"${groupId}\",\"requestMessage\": \"Fabric access request for PostgreSQL\"}" \
+            --fail --silent --show-error 
+        sleep 30
+    fi
     for arg in $(az postgres flexible-server show -n ${postgresql}  -g ${resourceGroup} --query "privateEndpointConnections[?privateLinkServiceConnectionState.status=='Pending'].id" -o tsv); do
         printProgress "Approving private Endpoint Connection: $arg"
-        az postgres flexible-server private-endpoint-connection approve --id $arg 
+        az postgres flexible-server private-endpoint-connection approve --id "$arg" --resource-group "$resourceGroup" --description "Approved by Fabric for PostgreSQL access"
     done
 }
 ##############################################################################
@@ -757,13 +780,25 @@ createFabricCosmosDBManagedPrivateEndpoints ()
     workspaceId=$(getFabricWorkspaceId $workspaceName)
 
     printProgress "Creating Managed Private Endpoint: $endpointName"
-    curl --request POST \
+    ID=$(curl --request GET \
         --url "https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/managedPrivateEndpoints" \
         --header "Authorization: Bearer $token" \
         --header "Content-Type: application/json" \
-        --data  "{\"name\": \"${endpointName}\",\"targetPrivateLinkResourceId\": \"${cosmosdbResourceId}\",\"targetSubresourceType\": \"${groupId}\",\"requestMessage\": \"Fabric access request for Cosmos DB\"}" \
-        --fail --silent --show-error 
-    sleep 30
+         --fail --silent --show-error | jq -r ".value[] | select(.name==\"${endpointName}\") | .id")
+    isGuid=$(isGuid "$ID")
+    if [ "$isGuid" = "true" ]; then
+        printProgress "Managed Private Endpoint: $endpointName already exists with id: $ID"
+    else
+        printProgress "Creating Managed Private Endpoint: $endpointName "   
+
+        curl --request POST \
+            --url "https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/managedPrivateEndpoints" \
+            --header "Authorization: Bearer $token" \
+            --header "Content-Type: application/json" \
+            --data  "{\"name\": \"${endpointName}\",\"targetPrivateLinkResourceId\": \"${cosmosdbResourceId}\",\"targetSubresourceType\": \"${groupId}\",\"requestMessage\": \"Fabric access request for Cosmos DB\"}" \
+            --fail --silent --show-error 
+        sleep 30
+    fi
     for arg in $(az cosmosdb show -n ${cosmosdb}  -g ${resourceGroup} --query "privateEndpointConnections[?privateLinkServiceConnectionState.status=='Pending'].id" -o tsv); do
         printProgress "Approving private Endpoint Connection: $arg"
         az cosmosdb private-endpoint-connection approve --id $arg 
@@ -785,13 +820,25 @@ createFabricStorageManagedPrivateEndpoints ()
     workspaceId=$(getFabricWorkspaceId $workspaceName)
 
     printProgress "Creating Managed Private Endpoint: $endpointName"
-    curl --request POST \
+    ID=$(curl --request GET \
         --url "https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/managedPrivateEndpoints" \
         --header "Authorization: Bearer $token" \
         --header "Content-Type: application/json" \
-        --data  "{\"name\": \"${endpointName}\",\"targetPrivateLinkResourceId\": \"${storageResourceId}\",\"targetSubresourceType\": \"${groupId}\",\"requestMessage\": \"Fabric access request for Storage Account\"}" \
-        --fail --silent --show-error 
-    sleep 30
+         --fail --silent --show-error | jq -r ".value[] | select(.name==\"${endpointName}\") | .id")
+    isGuid=$(isGuid "$ID")
+    if [ "$isGuid" = "true" ]; then
+        printProgress "Managed Private Endpoint: $endpointName already exists with id: $ID"
+    else
+        printProgress "Creating Managed Private Endpoint: $endpointName "            
+ 
+        curl --request POST \
+            --url "https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/managedPrivateEndpoints" \
+            --header "Authorization: Bearer $token" \
+            --header "Content-Type: application/json" \
+            --data  "{\"name\": \"${endpointName}\",\"targetPrivateLinkResourceId\": \"${storageResourceId}\",\"targetSubresourceType\": \"${groupId}\",\"requestMessage\": \"Fabric access request for Storage Account\"}" \
+            --fail --silent --show-error 
+        sleep 30
+    fi
     for arg in $(az storage account show -n ${storage}  -g ${resourceGroup} --query "privateEndpointConnections[?privateLinkServiceConnectionState.status=='Pending'].id" -o tsv); do
         printProgress "Approving private Endpoint Connection: $arg"
         az storage account private-endpoint-connection approve --id $arg 
@@ -812,13 +859,25 @@ createFabricKeyVaultManagedPrivateEndpoints ()
     workspaceId=$(getFabricWorkspaceId $workspaceName)
 
     printProgress "Creating Managed Private Endpoint: $endpointName"
-    curl --request POST \
+    ID=$(curl --request GET \
         --url "https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/managedPrivateEndpoints" \
         --header "Authorization: Bearer $token" \
         --header "Content-Type: application/json" \
-        --data  "{\"name\": \"${endpointName}\",\"targetPrivateLinkResourceId\": \"${keyVaultResourceId}\",\"targetSubresourceType\": \"${groupId}\",\"requestMessage\": \"Fabric access request for Key Vault\"}" \
-        --fail --silent --show-error 
-    sleep 30
+         --fail --silent --show-error | jq -r ".value[] | select(.name==\"${endpointName}\") | .id")
+    isGuid=$(isGuid "$ID")
+    if [ "$isGuid" = "true" ]; then
+        printProgress "Managed Private Endpoint: $endpointName already exists with id: $ID"
+    else
+        printProgress "Creating Managed Private Endpoint: $endpointName "            
+
+        curl --request POST \
+            --url "https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/managedPrivateEndpoints" \
+            --header "Authorization: Bearer $token" \
+            --header "Content-Type: application/json" \
+            --data  "{\"name\": \"${endpointName}\",\"targetPrivateLinkResourceId\": \"${keyVaultResourceId}\",\"targetSubresourceType\": \"${groupId}\",\"requestMessage\": \"Fabric access request for Key Vault\"}" \
+            --fail --silent --show-error 
+        sleep 30
+    fi
     for arg in $(az keyvault show -n ${keyVault} -g ${resourceGroup}  --query "properties.privateEndpointConnections[?privateLinkServiceConnectionState.status=='Pending'].id" -o tsv); do
         printProgress "Approving private Endpoint Connection: $arg"
         az network private-endpoint-connection approve --id $arg 
@@ -1251,6 +1310,7 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
         printProgress "Resource group '${RESOURCE_GROUP_NAME}' already exists"
     fi
     setAzureResourceNames ${AZURE_ENVIRONMENT} "${VISIBILITY}" "${AZURE_SUFFIX}" "${RESOURCE_GROUP_NAME}"
+
     if [ -z "${AZURE_FABRIC_WORKSPACE_IDENTITY+x}" ] ; then
         if [ -n "${AZURE_FABRIC_WORKSPACE_NAME}" ]; then
             AZURE_FABRIC_WORKSPACE_ID=$(getFabricWorkspaceId "${AZURE_FABRIC_WORKSPACE_NAME}")
@@ -1309,9 +1369,6 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
         DATA_GATEWAY_RECOVERY_KEY=$(tr -dc 'A-Za-z0-9!?%=' < /dev/urandom | head -c 12)$(tr -dc '[:upper:]' < /dev/urandom  | head -c1)$(tr -dc '[:lower:]' < /dev/urandom  | head -c1)$(tr -dc '0-9' < /dev/urandom  | head -c1)
         updateSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_DATAGW_VM_RECOVERY_KEY_SECRET_NAME}" "${DATA_GATEWAY_RECOVERY_KEY}"
     fi
-
-    AZURE_DATAGW_CERTIFICATE_SECRET_NAME
-    AZURE_DATAGW_CERTIFICATE_PASSWORD_SECRET_NAME
 
     DATA_GATEWAY_CERTIFICATE_PASSWORD=$(readSecretInKeyVault "${AZURE_KEY_VAULT_NAME}" "${AZURE_DATAGW_CERTIFICATE_PASSWORD_SECRET_NAME}")
     if [ -z "${DATA_GATEWAY_CERTIFICATE_PASSWORD}" ]; then
@@ -1392,7 +1449,7 @@ if [ "${ACTION}" = "deploy-private-datasource" ] ; then
     recoveryKey=\"${DATA_GATEWAY_RECOVERY_KEY}\" \
     fabricPrincipalId=\"${AZURE_FABRIC_WORKSPACE_IDENTITY}\" \
     objectId=\"${OBJECT_ID}\"  objectType=\"${OBJECT_TYPE}\"  \
-    clientIpAddress=\"${CLIENT_IP_ADDRESS}\"  --verbose"
+    clientIpAddress=\"${CLIENT_IP_ADDRESS}\"  appId=\"${APP_ID}\" --verbose"
     printProgress "$cmd"
     eval "$cmd"
     checkError

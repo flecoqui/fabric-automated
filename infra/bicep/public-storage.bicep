@@ -34,6 +34,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-06-01' = {
   location: location
   properties: {
     accessTier: 'Hot'
+    minimumTlsVersion: 'TLS1_2'
     supportsHttpsTrafficOnly: true
     allowSharedKeyAccess: true
     isHnsEnabled: true

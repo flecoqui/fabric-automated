@@ -160,7 +160,7 @@ resource peDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups
       {
         name: privateDnsZoneName
         properties: {
-          privateDnsZoneId: privateDnsZone.id
+          privateDnsZoneId: createDnsZone ? privateDnsZone.id : searchPrivateDnsZoneId
         }
       }
     ]
@@ -188,7 +188,7 @@ resource storageBlobRoleAssignment2 'Microsoft.Authorization/roleAssignments@202
   }
 }
 
-var searchIndexDataContributorRoleId = '7ca78c08-252a-4471-8644-bb5ff32d4ba0'
+var searchIndexDataContributorRoleId = '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
 resource storageFileRoleAssignment3 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(search.id, fabricPrincipalId, searchIndexDataContributorRoleId)
   scope: search

@@ -192,9 +192,7 @@ Remove-Item C:\temp\dg.pfx
 # Doc: log in first using Connect-DataGatewayServiceAccount before Get-DataGatewayAccessToken. [2](https://www.advancedinstaller.com/install-msi-files-with-powershell.html)[3](https://stackoverflow.com/questions/74166150/install-winget-by-the-command-line-powershell)
 Trace-Log "Connect to Data Gateway service account"
 $thumb = (Get-ChildItem Cert:\LocalMachine\My |
-  Where-Object Subject -like "*DataGateway-SP*").Thumbprint
-$appId = "799926eb-f414-4902-9b12-88976d4631a2"
-$tenantId = "9a1ed33b-f639-47ca-aea1-326c597593be"
+  Where-Object Subject -like "*DATA-GATEWAY-SP*").Thumbprint
 
 Trace-Log "Connection to service"
 Connect-DataGatewayServiceAccount `
