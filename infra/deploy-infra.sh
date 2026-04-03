@@ -185,7 +185,7 @@ setAzureResourceNames()
     echo "AZURE_DATAGW_VM_RECOVERY_KEY_SECRET_NAME: $AZURE_DATAGW_VM_RECOVERY_KEY_SECRET_NAME"
     AZURE_DATAGW_CERTIFICATE_SECRET_NAME=$(echo ${RESULT}  | jq -r '.datagwCertificateSecretName.value' 2>/dev/null)
     echo "AZURE_DATAGW_CERTIFICATE_SECRET_NAME: $AZURE_DATAGW_CERTIFICATE_SECRET_NAME"
-    AZURE_DATAGW_CERTIFICATE_PASSWORD_SECRET_NAME=$(echo ${RESULT}  | jq -r '.datagwCertificatePasswordSecretName.value' 2>/dev/null)
+    AZURE_DATAGW_CERTIFICATE_PASSWORD_SECRET_NAME=$(echo ${RESULT}  | jq -r '.datagwCertificatePassSecretName.value' 2>/dev/null)
     echo "AZURE_DATAGW_CERTIFICATE_PASSWORD_SECRET_NAME: $AZURE_DATAGW_CERTIFICATE_PASSWORD_SECRET_NAME"
     AZURE_DATAGW_CERTIFICATE_NAME=$(echo ${RESULT}  | jq -r '.datagwCertificateName.value' 2>/dev/null)
     echo "AZURE_DATAGW_CERTIFICATE_NAME: $AZURE_DATAGW_CERTIFICATE_NAME"
@@ -221,7 +221,7 @@ getFabricResourceGroupName()
     visibility="$2"
     suffix="$3"
     if [ ! -z "${AZURE_DEFAULT_FABRIC_RESOURCE_GROUP+x}" ] ; then
-        if [ "${AZURE_DEFAULT_FABRIC_RESOURCE_GROUP}" != "" ] ; then
+        if [ -z "${AZURE_DEFAULT_FABRIC_RESOURCE_GROUP}" ] && [ "${AZURE_DEFAULT_FABRIC_RESOURCE_GROUP}" != "" ] ; then
             echo "${AZURE_DEFAULT_FABRIC_RESOURCE_GROUP}"
             return
         fi
@@ -491,12 +491,12 @@ checkAzureConfiguration() {
             CONFIG_SUBSCRIPTION_ID=$(readConfigurationFileValue "$CONFIGURATION_FILE" "AZURE_SUBSCRIPTION_ID")
             if [ ! -z "${CONFIG_SUBSCRIPTION_ID}" ] && [ "$CONFIG_SUBSCRIPTION_ID" != "$CURRENT_SUBSCRIPTION_ID" ]; then
                 printProgress "Updating a Azure Configuration file: $CONFIGURATION_FILE value: AZURE_SUBSCRIPTION_ID=$CURRENT_SUBSCRIPTION_ID..."
-                updateConfigurationFileValue "$CONFIGURATION_FILE" "AZURE_SUBSCRIPTION_ID" "$CURRENT_SUBSCRIPTION_ID"
+                updateConfigurationFile "$CONFIGURATION_FILE" "AZURE_SUBSCRIPTION_ID" "$CURRENT_SUBSCRIPTION_ID"
             fi
             CONFIG_TENANT_ID=$(readConfigurationFileValue "$CONFIGURATION_FILE" "AZURE_TENANT_ID")
             if [ ! -z "${CONFIG_TENANT_ID}" ] && [ "$CONFIG_TENANT_ID" != "$CURRENT_TENANT_ID" ]; then
                 printProgress "Updating a Azure Configuration file: $CONFIGURATION_FILE value: AZURE_TENANT_ID=$CURRENT_TENANT_ID..."
-                updateConfigurationFileValue "$CONFIGURATION_FILE" "AZURE_TENANT_ID" "$CURRENT_TENANT_ID"
+                updateConfigurationFile "$CONFIGURATION_FILE" "AZURE_TENANT_ID" "$CURRENT_TENANT_ID"
             fi
             CONFIG_SUFFIX=$(readConfigurationFileValue "$CONFIGURATION_FILE" "AZURE_SUFFIX")
             if [ -z "${CONFIG_SUFFIX}" ]; then
@@ -569,10 +569,12 @@ getCurrentObjectType() {
 ##############################################################################
 createFabricWorkspace() {
   TOKEN=$(az account get-access-token --resource https://api.fabric.microsoft.com --query accessToken -o tsv)
-  WORKSPACE_NAME=$1
+  FABRIC_ACCOUNT_NAME=$1
+  WORKSPACE_NAME=$2
+  SKU=$3
   FABRIC_CAPACITY_ID=$(curl --request GET \
   --url "https://api.fabric.microsoft.com/v1/capacities" \
-  --header "Authorization: Bearer $TOKEN" --fail --silent --show-error  | jq -r ".value[] | select(.sku==\"${FABRIC_SKU}\") | .id")    
+  --header "Authorization: Bearer $TOKEN" --fail --silent --show-error  | jq -r ".value[] | select(.sku==\"${SKU}\"  and .displayName==\"${FABRIC_ACCOUNT_NAME}\") | .id")    
   
   curl --request POST \
     --url "https://api.fabric.microsoft.com/v1/workspaces" \
@@ -950,7 +952,7 @@ checkAzureConfiguration
 if [ "${ACTION}" = "deploy-public-fabric" ] ; then
     printProgress "Checking whether the Azure CLI providers and extensions are installed..."
     installPreRequisites
-    VISIBILITY="pub"
+    VISIBILITY="pub"    
     RESOURCE_GROUP_NAME=$(getFabricResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
     if [ "$(az group exists --name "${RESOURCE_GROUP_NAME}")" = "false" ]; then
         printProgress "Create resource group  '${RESOURCE_GROUP_NAME}' in location '${AZURE_REGION}'"
@@ -961,6 +963,7 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
     else
         printProgress "Resource group '${RESOURCE_GROUP_NAME}' already exists"
     fi
+    printProgress "call set name ."
     setAzureResourceNames ${AZURE_ENVIRONMENT} "${VISIBILITY}" "${AZURE_SUFFIX}" "${RESOURCE_GROUP_NAME}"
 
     CLIENT_IP_ADDRESS=$(curl -s https://ifconfig.me)
@@ -976,7 +979,8 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
         exit 1
     fi
     printProgress "Deploy public Fabric in resource group '${RESOURCE_GROUP_NAME}'"
-    DEPLOY_NAME=$(date +"%y%m%d%H%M%S")
+    DEFAULT_DEPLOYMENT_PREFIX="${AZURE_ENVIRONMENT}${VISIBILITY}${AZURE_SUFFIX}"
+    DEPLOY_NAME=$(date +"fabric${DEFAULT_DEPLOYMENT_PREFIX}-%y%m%d%H%M%S")
     cmd="az deployment group create --resource-group $RESOURCE_GROUP_NAME  --name ${DEPLOY_NAME}   \
     --template-file $SCRIPTS_DIRECTORY/bicep/public-main.bicep \
     --parameters \
@@ -995,7 +999,8 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
         WORKSPACE_ID=$(getFabricWorkspaceId "${AZURE_FABRIC_WORKSPACE_NAME}")
         if [ -z "${WORKSPACE_ID}" ]; then
             printProgress "Creating Fabric workspace with name ${AZURE_FABRIC_WORKSPACE_NAME}"
-            createFabricWorkspace "${AZURE_FABRIC_WORKSPACE_NAME}"
+            createFabricWorkspace "${AZURE_FABRIC_ACCOUNT_NAME}" "${AZURE_FABRIC_WORKSPACE_NAME}" "${FABRIC_SKU}"
+            sleep 10
             WORKSPACE_ID=$(getFabricWorkspaceId "${AZURE_FABRIC_WORKSPACE_NAME}")
         fi
         if [ -z "${WORKSPACE_ID}" ]; then
@@ -1023,8 +1028,8 @@ if [ "${ACTION}" = "deploy-public-fabric" ] ; then
 fi
 
 if [ "${ACTION}" = "deploy-public-datasource" ] ; then
-    VISIBILITY="pub"
     installPreRequisites    
+    VISIBILITY="pub"
     RESOURCE_GROUP_NAME=$(getDatasourceResourceGroupName "${AZURE_ENVIRONMENT}" "${VISIBILITY}" "${AZURE_SUFFIX}")
     if [ "$(az group exists --name "${RESOURCE_GROUP_NAME}")" = "false" ]; then
         printProgress "Create resource group  '${RESOURCE_GROUP_NAME}' in location '${AZURE_REGION}'"
@@ -1081,7 +1086,8 @@ if [ "${ACTION}" = "deploy-public-datasource" ] ; then
     fi
 
     printProgress "Deploy public datasource in resource group '${RESOURCE_GROUP_NAME}'"
-    DEPLOY_NAME=$(date +"%y%m%d%H%M%S")
+    DEFAULT_DEPLOYMENT_PREFIX="${AZURE_ENVIRONMENT}${VISIBILITY}${AZURE_SUFFIX}"
+    DEPLOY_NAME=$(date +"datasource${DEFAULT_DEPLOYMENT_PREFIX}-%y%m%d%H%M%S")
     cmd="az deployment group create --resource-group $RESOURCE_GROUP_NAME \
     --name "${DEPLOY_NAME}" --template-file $SCRIPTS_DIRECTORY/bicep/public-datasource.bicep \
     --parameters  \
@@ -1167,7 +1173,8 @@ if [ "${ACTION}" = "deploy-private-fabric" ] ; then
         printError "Cannot get current user principal name"
         exit 1
     fi    
-    DEPLOY_NAME=$(date +"%y%m%d%H%M%S")
+    DEFAULT_DEPLOYMENT_PREFIX="${AZURE_ENVIRONMENT}${VISIBILITY}${AZURE_SUFFIX}"
+    DEPLOY_NAME=$(date +"fabric${DEFAULT_DEPLOYMENT_PREFIX}-%y%m%d%H%M%S")
     cmd="az deployment group create --resource-group $RESOURCE_GROUP_NAME --name ${DEPLOY_NAME} \
     --template-file $SCRIPTS_DIRECTORY/bicep/private-main.bicep \
     --parameters \
@@ -1196,7 +1203,8 @@ if [ "${ACTION}" = "deploy-private-fabric" ] ; then
         WORKSPACE_ID=$(getFabricWorkspaceId "${AZURE_FABRIC_WORKSPACE_NAME}")
         if [ -z "${WORKSPACE_ID}" ]; then
             printProgress "Creating Fabric workspace with name ${AZURE_FABRIC_WORKSPACE_NAME}"
-            createFabricWorkspace "${AZURE_FABRIC_WORKSPACE_NAME}"
+            createFabricWorkspace "${AZURE_FABRIC_ACCOUNT_NAME}" "${AZURE_FABRIC_WORKSPACE_NAME}" "${FABRIC_SKU}"
+            sleep 10
             WORKSPACE_ID=$(getFabricWorkspaceId "${AZURE_FABRIC_WORKSPACE_NAME}")
         fi
         if [ -z "${WORKSPACE_ID}" ]; then

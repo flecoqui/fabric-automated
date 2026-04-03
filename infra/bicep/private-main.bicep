@@ -98,10 +98,13 @@ var fabricAccountName = namingModule.outputs.fabricAccountName
 var privateDnsNames = [
   'privatelink.vaultcore.azure.net'
   'privatelink.blob.${environment().suffixes.storage}'
+  'privatelink.file.${environment().suffixes.storage}'
   'privatelink.dfs.${environment().suffixes.storage}'
   'privatelink.postgres.database.azure.com'
   'privatelink.documents.azure.com'
   'privatelink.search.windows.net'
+  'privatelink.cognitiveservices.azure.com'
+  'privatelink.openai.azure.com'  
 ]
 
 // Defining Private DNS Zones resource group and subscription id

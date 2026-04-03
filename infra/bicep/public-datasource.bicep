@@ -153,6 +153,20 @@ module searchModule 'public-search.bicep' = {
   ]
 }
 
+
+module foundryModule 'public-foundry.bicep' = {
+  name: 'FoundryDeploy'
+  scope: resourceGroup()
+  params: {
+    location: location
+    foundryName: namingModule.outputs.foundryName
+    foundryProjectName: namingModule.outputs.foundryProjectName
+    objectId: objectId
+    objectType: objectType    
+    tags: tags
+  }
+}
+
 output outStorageAccountName string = storageModule.outputs.outStorageAccountName
 output outStorageFilesysName string = storageModule.outputs.outStorageFilesysName
 output postgresqlId string = postgresqlModule.outputs.postgresqlId

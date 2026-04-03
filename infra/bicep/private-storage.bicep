@@ -26,6 +26,9 @@ param dfsPrivateDnsZoneId string
 @description('The Private DNS Zone id for registering storage "blob" private endpoints.')
 param blobPrivateDnsZoneId string
 
+@description('The Private DNS Zone id for registering storage "file" private endpoints.')
+param filePrivateDnsZoneId string
+
 @description('The Fabric account principal ID.')
 param fabricPrincipalId string = ''
 
@@ -150,6 +153,42 @@ resource dnsZonesGroupsDfs 'Microsoft.Network/privateEndpoints/privateDnsZoneGro
         name: 'config'
         properties: {
           privateDnsZoneId: dfsPrivateDnsZoneId
+        }
+      }
+    ]
+  }
+}
+
+resource privateEndpointFile 'Microsoft.Network/privateEndpoints@2021-03-01' = {
+  name: 'pe-st-file-${baseName}'
+  location: location
+  properties: {
+    subnet: {
+      id: privateSubnetId
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'plsc-st-file-${baseName}'
+        properties: {
+          privateLinkServiceId: storageAccount.id
+          groupIds: [
+            'file'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource dnsZonesGroupsFile 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2021-03-01' = {
+  parent: privateEndpointFile
+  name: 'filePrivateDnsZoneGroup'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'config'
+        properties: {
+          privateDnsZoneId: filePrivateDnsZoneId
         }
       }
     ]

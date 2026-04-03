@@ -90,11 +90,13 @@ var calcDnsZoneSubscriptionId = (newOrExistingDnsZones == 'new') ? subscription(
 
 // Getting the Ids for existing or newly created Private DNS Zones
 var dfsPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.dfs.${environment().suffixes.storage}')
+var filePrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.file.${environment().suffixes.storage}')
 var blobPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.blob.${environment().suffixes.storage}')
 var postgresqlPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.postgres.database.azure.com')
 var cosmosdbPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.documents.azure.com')
 var searchPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.search.windows.net')
-
+var cognitiveServicesPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.cognitiveservices.azure.com')
+var openAiPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.openai.azure.com')
 
 ///subscriptions/4b6e25b6-6b90-497a-9aa7-e673e32bc08c/resourceGroups/rgprivatepurview/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net
 //var dfsPrivateDnsZoneId = resourceId('4b6e25b6-6b90-497a-9aa7-e673e32bc08c', 'rgprivatepurview', 'Microsoft.Network/privateDnsZones', 'privatelink.blob.core.windows.net')
@@ -119,6 +121,7 @@ module storageModule 'private-storage.bicep' = {
     vnetResourceGroupName: dnsZoneResourceGroupName
     dfsPrivateDnsZoneId: dfsPrivateDnsZoneId
     blobPrivateDnsZoneId: blobPrivateDnsZoneId
+    filePrivateDnsZoneId: filePrivateDnsZoneId
     fabricPrincipalId: fabricPrincipalId
     objectId: objectId
     objectType: objectType
@@ -207,6 +210,25 @@ module dataGatewayModule 'private-datagw.bicep' = {
   }
   dependsOn: [
   ]
+}
+
+module foundryModule 'private-foundry.bicep' = {
+  name: 'FoundryDeploy'
+  scope: resourceGroup()
+  params: {
+    location: location
+    baseName: namingModule.outputs.baseName
+    foundryName: namingModule.outputs.foundryName
+    foundryProjectName: namingModule.outputs.foundryProjectName
+    vnetName: vnetName
+    subnetName: privateEndpointSubnetName
+    vnetResourceGroupName: calcDnsZoneResourceGroupName
+    cognitiveServicesPrivateDnsZoneId: cognitiveServicesPrivateDnsZoneId
+    openAiPrivateDnsZoneId: openAiPrivateDnsZoneId
+    objectId: objectId
+    objectType: objectType    
+    tags: tags
+  }
 }
 
 output outStorageAccountName string = storageModule.outputs.outStorageAccountName
