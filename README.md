@@ -39,7 +39,7 @@ In order to test the solution, you need first an Azure Subscription, you can get
 
 You also need to install Git client and Visual Studio Code on your machine, below the links.
 
-|[![Windows](./infra/windows_logo.png)](https://git-scm.com/download/win) |[![Linux](./infra/linux_logo.png)](https://git-scm.com/download/linux)|[![MacOS](./infra/macos_logo.png)](https://git-scm.com/download/mac)|
+|[![Windows](./diagrams/windows_logo.png)](https://git-scm.com/download/win) |[![Linux](./diagrams/linux_logo.png)](https://git-scm.com/download/linux)|[![MacOS](./diagrams/macos_logo.png)](https://git-scm.com/download/mac)|
 |:---|:---|:---|
 | [Git Client for Windows](https://git-scm.com/download/win) | [Git client for Linux](https://git-scm.com/download/linux)| [Git Client for MacOs](https://git-scm.com/download/mac) |
 [Visual Studio Code for Windows](https://code.visualstudio.com/Download)  | [Visual Studio Code for Linux](https://code.visualstudio.com/Download)  &nbsp;| [Visual Studio Code for MacOS](https://code.visualstudio.com/Download) &nbsp; &nbsp;|
@@ -101,7 +101,7 @@ You need to install the following pre-requisite on your machine
 
 2. Once Visual Studio Code is launched, you should see the following dialog box:
 
-    ![Visual Studio Code](./infra/reopen-in-container.png)
+    ![Visual Studio Code](./diagrams/reopen-in-container.png)
 
 3. Click on the button 'Reopen in Container'
 4. Visual Studio Code opens the Dev Container. If it's the first time you open the project in container mode, it first builds the container, it can take several minutes to build the new container.
@@ -114,7 +114,7 @@ You need to install the following pre-requisite on your machine
 
 ### How to deploy infrastructure from the Dev Container terminal
 
-The Dev Container is now running, you can use the bash file [./infra/deploy-infra.sh ](./infra/infra/deploy-infra.sh ) to:
+The Dev Container is now running, you can use the bash file [./infra/deploy-infra.sh ](./infra/deploy-infra.sh ) to:
 
 - deploy the infrastructure 
 - create data copy pipeline
@@ -257,7 +257,7 @@ Usually this step is not required in a pipeline as the connection with Azure is 
     AZURE_ENVIRONMENT defines the environment 'dev', 'stag', 'prod',...
 
 
-2. Once Fabric is deployed into your Azure subscription, you can now deploy a datasources (Azure Storage Account ADLS gen2, Synapse Workspace, Synapse Azure Storage Account ADLS gen2, PostgreSQL pool) associated with public endpoints. This datasource will be accessible for the Fabric account.
+2. Once Fabric is deployed into your Azure subscription, you can now deploy a datasources (Azure Storage Account, Microosft Foundry, PostgreSQL database, CosmosDB) associated with public endpoints. This datasource will be accessible for the Fabric account.
 
     ```bash
         vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-public-datasource
@@ -324,7 +324,7 @@ Usually this step is not required in a pipeline as the connection with Azure is 
  - Managed VNET Integration Runtime to scan data sources connected to a VNET and using Role Based Access Control
  - Self Hosted Integration Runtime to scan data sources using a Storage Account Key stored in the Key Vault or to scan data sources on premises
 
-##### Deploying a data source (Azure Storage Account ADLS gen2 connected to a virtual network)
+##### Deploying data source (Azure Storage Account, Microsoft Foundry, PostgreSQL database, CosmosDB to a virtual network)
 
 1. Once Fabric is deployed into your Azure subscription, you have access to the resources through the VPN connection, you can now deploy a datasource (Azure Storage Account ADLS gen2) associated with private endpoints. This datasource will be accessible for the Fabric account.
 
@@ -333,8 +333,14 @@ Usually this step is not required in a pipeline as the connection with Azure is 
     ```
     After this step, dataset files are copied in the container 'test01' in the new storage.
     Moreover, This command will deploy the On Premises Data Gateway connected to the VNET. This data gateway can be used from Microsoft Fabric to establish a connection with fully isolated data source.
-    
 
+2.  You can open the Fabric portal url https://web.fabric.azure.com/ and check whether the managed private endpoints have been created. Select the new workspace, in the workspace settings dialog, select the "Outbound networking", you will discover the list of managed private endpoints: 
+
+![Managed Private Endpoint](./diagrams/mpe.png)
+
+3. You can also check whether the Data Gateway has been deployed. Select the Global Fabric settings and the tab 'Manage Connections and Gateways', and then the 'On-premises data gateways' 
+
+![Data Gateway](./diagrams/datagateway.png)
 
 ##### Removing the resources
 
