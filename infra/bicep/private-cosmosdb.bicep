@@ -22,7 +22,7 @@ param vnetResourceGroupName string
 @description('Resource ID of the private DNS zone (privatelink.documents.azure.com). Leave empty to create a new one.')
 param cosmosDnsZoneId string = ''
 
-@description('Principal ID of the Fabric / Purview managed identity for data-plane access.')
+@description('Principal ID of the Fabric for data-plane access.')
 param fabricPrincipalId string = ''
 
 @description('Object ID of the user or service principal running the deployment.')

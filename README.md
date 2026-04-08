@@ -151,9 +151,8 @@ Usually this step is not required in a pipeline as the connection with Azure is 
     ```
 
     After this step, the variables AZURE_REGION, AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID and AZURE_ENVIRONMENT used for the deployment are stored in the file ./.config/.default.env.
-    The variable AZURE_DEFAULT_FABRIC_RESOURCE_GROUP and AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP are by default empty string.
-    By default the name of the Fabric resource group will be 'rgpurview[AZURE_ENVIRONMENT][visibility][AZURE_SUFFIX]'
-    the name of the Datasource resource group will be 'rgdatasource[AZURE_ENVIRONMENT][visibility][AZURE_SUFFIX]'
+    The variable AZURE_DEFAULT_FABRIC_RESOURCE_GROUP is by default empty string.
+    By default the name of the Fabric resource group will be 'rgfabric[AZURE_ENVIRONMENT][visibility][AZURE_SUFFIX]'
     where [visibility] value is 'pri' for private deployment and 'pub' for public deployment.
 
     ```bash
@@ -164,7 +163,6 @@ Usually this step is not required in a pipeline as the connection with Azure is 
         AZURE_TENANT_ID=to-be-updated
         AZURE_ENVIRONMENT=dev
         AZURE_DEFAULT_FABRIC_RESOURCE_GROUP=""
-        AZURE_DEFAULT_DATASOURCE_RESOURCE_GROUP=""
     ```
 
     In order to deploy the infrastructure with the script 'deploy-infra.sh ', you need to be connected to Azure with sufficient privileges to assign roles to Azure Key Vault and Azure Storage Accounts.
@@ -236,9 +234,8 @@ Usually this step is not required in a pipeline as the connection with Azure is 
         vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-public-fabric
     ```
 
-    After this step, the variables AZURE_SUFFIX and PURVIEW_PRINCIPAL_ID used for the deployment are stored in the file ./.config/.default.env.
-    AZURE_SUFFIX is used to name the Azure resource. For a public endpoint deployement with suffix will be "${AZURE_ENVIRONMENT}pub${AZURE_SUFFIX}", and "${AZURE_ENVIRONMENT}pri${AZURE_SUFFIX}" for a deployment with private endpoints
-    PURVIEW_PRINCIPAL_ID is the principal id of the managed identity associated with the Fabric account.
+    After this step, the variable AZURE_SUFFIX used for the deployment are stored in the file ./.config/.default.env.
+    AZURE_SUFFIX is used to name the Azure resource. For a public endpoint deployment with suffix will be "${AZURE_ENVIRONMENT}pub${AZURE_SUFFIX}", and "${AZURE_ENVIRONMENT}pri${AZURE_SUFFIX}" for a deployment with private endpoints
 
     ```bash
         vscode ➜ /workspaces/fabric-automated (main) $ cat ./.config/.default.env
@@ -247,7 +244,6 @@ Usually this step is not required in a pipeline as the connection with Azure is 
         AZURE_TENANT_ID=to-be-completed
         AZURE_ENVIRONMENT=dev
         AZURE_SUFFIX=3033
-        PURVIEW_PRINCIPAL_ID=to-be-completed
     ```
 
     AZURE_REGION defines the Azure region where you want to install your infrastructure, it's 'westus3' by default.
@@ -283,9 +279,8 @@ Usually this step is not required in a pipeline as the connection with Azure is 
         vscode ➜ /workspaces/fabric-automated (main) $ ./infra/deploy-infra.sh   -a deploy-private-fabric
     ```
 
-    After this step, the variables AZURE_SUFFIX and PURVIEW_PRINCIPAL_ID used for the deployment are stored in the file ./.config/.default.env.
-    AZURE_SUFFIX is used to name the Azure resource. For a private endpoint deployement with suffix will be "${AZURE_ENVIRONMENT}pub${AZURE_SUFFIX}", and "${AZURE_ENVIRONMENT}pri${AZURE_SUFFIX}" for a deployment with private endpoints
-    PURVIEW_PRINCIPAL_ID is the principal id of the managed identity associated with the Fabric account.
+    After this step, the variable AZURE_SUFFIX used for the deployment are stored in the file ./.config/.default.env.
+    AZURE_SUFFIX is used to name the Azure resource. For a private endpoint deployment with suffix will be "${AZURE_ENVIRONMENT}pub${AZURE_SUFFIX}", and "${AZURE_ENVIRONMENT}pri${AZURE_SUFFIX}" for a deployment with private endpoints
 
     ```bash
         vscode ➜ /workspaces/fabric-automated (main) $ cat ./.config/.default.env
@@ -294,7 +289,6 @@ Usually this step is not required in a pipeline as the connection with Azure is 
         AZURE_TENANT_ID=to-be-completed
         AZURE_ENVIRONMENT=dev
         AZURE_SUFFIX=3033
-        PURVIEW_PRINCIPAL_ID=to-be-completed
     ```
 
     AZURE_REGION defines the Azure region where you want to install your infrastructure, it's 'westus3' by default.

@@ -98,15 +98,6 @@ var searchPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneRe
 var cognitiveServicesPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.cognitiveservices.azure.com')
 var openAiPrivateDnsZoneId = resourceId(calcDnsZoneSubscriptionId, calcDnsZoneResourceGroupName, 'Microsoft.Network/privateDnsZones', 'privatelink.openai.azure.com')
 
-///subscriptions/4b6e25b6-6b90-497a-9aa7-e673e32bc08c/resourceGroups/rgprivatepurview/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net
-//var dfsPrivateDnsZoneId = resourceId('4b6e25b6-6b90-497a-9aa7-e673e32bc08c', 'rgprivatepurview', 'Microsoft.Network/privateDnsZones', 'privatelink.blob.core.windows.net')
-
-
-///subscriptions/4b6e25b6-6b90-497a-9aa7-e673e32bc08c/resourceGroups/rgprivatepurview/providers/Microsoft.Network/privateDnsZones/privatelink.dfs.core.windows.net
-//var blobPrivateDnsZoneId = resourceId('4b6e25b6-6b90-497a-9aa7-e673e32bc08c', 'rgprivatepurview', 'Microsoft.Network/privateDnsZones', 'privatelink.dfs.core.windows.net')
-
-
-
 
 module storageModule 'private-storage.bicep' = {
   name: 'StorageDeploy'
